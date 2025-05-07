@@ -9,8 +9,44 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import boto3
+import json
+from botocore.exceptions import ClientError
+import os
+import json
 from pathlib import Path
+import requests
+
+
+
+# def get_current_region():
+#     try:
+#         response = requests.get(
+#             "http://169.254.169.254/latest/dynamic/instance-identity/document",
+#             timeout=2
+#         )
+#         region = response.json().get("region")
+#         if region:
+#             print(f"Detected region from metadata: {region}")
+#             return region
+#     except Exception as e:
+#         print(f"Metadata fallback failed: {e}")
+
+
+# def get_database_secrets():
+#     current_region = get_current_region()
+#     secret_name = f"dr-project-secret-key-{current_region}"
+#     print(f"print current region: {current_region}")
+
+#     try:
+#         print(f"Fetching secret: {secret_name}")
+#         client = boto3.client("secretsmanager", region_name=current_region)
+#         response = client.get_secret_value(SecretId=secret_name)
+#         return json.loads(response["SecretString"])
+#     except ClientError as e:
+#         print(f"Failed to fetch secret: {e}")
+#         raise RuntimeError("Could not retrieve DB credentials")
+# secrets = get_database_secrets()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -73,18 +109,16 @@ WSGI_APPLICATION = 'admin.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'admin',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'db',
-        'PORT': '3306',
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("SQL_DATABASE", "hello_django_prod"),
+        "USER": os.environ.get("SQL_USER", "hello_django"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "hello_django"),
+        "HOST": os.environ.get("SQL_HOST", "db"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 

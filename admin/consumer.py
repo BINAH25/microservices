@@ -5,7 +5,7 @@ django.setup()
 
 from products.models import Product
 
-params = pika.URLParameters('your_rabbitmq_url')
+params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
 
 connection = pika.BlockingConnection(params)
 
@@ -16,11 +16,11 @@ channel.queue_declare(queue='admin')
 
 def callback(ch, method, properties, body):
     print('Received in admin')
-    id = json.loads(body)
-    print(id)
-    product = Product.objects.get(id=id)
-    product.likes = product.likes + 1
-    product.save()
+    # id = json.loads(body)
+    # print(id)
+    # product = Product.objects.get(id=id)
+    # product.likes = product.likes + 1
+    # product.save()
     print('Product likes increased!')
 
 

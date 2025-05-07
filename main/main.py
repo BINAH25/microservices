@@ -8,7 +8,7 @@ import requests
 from producer import publish
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://root:root@db/main'
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://root:root@db:5434/main'
 CORS(app)
 
 db = SQLAlchemy(app)

@@ -1,6 +1,6 @@
 import pika, json
 
-params = pika.URLParameters('your_rabbitmq_url')
+params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
 
 connection = pika.BlockingConnection(params)
 
