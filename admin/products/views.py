@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
 
-from .models import Product, User
+from .models import Product
 from .producer import publish
 from .serializers import ProductSerializer
 import random
@@ -43,7 +44,10 @@ class ProductViewSet(viewsets.ViewSet):
 
 class UserAPIView(APIView):
     def get(self, _):
-        users = User.objects.all()
+        users = User.objects.all()        
+        if not users:
+            return Response({'error': 'No users available'}, status=404)
+        
         user = random.choice(users)
         return Response({
             'id': user.id

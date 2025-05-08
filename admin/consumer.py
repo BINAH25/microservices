@@ -16,11 +16,11 @@ channel.queue_declare(queue='admin')
 
 def callback(ch, method, properties, body):
     print('Received in admin')
-    # id = json.loads(body)
-    # print(id)
-    # product = Product.objects.get(id=id)
-    # product.likes = product.likes + 1
-    # product.save()
+    id = json.loads(body)
+    print(id)
+    product = Product.objects.get(id=id)
+    product.likes = product.likes + 1
+    product.save()
     print('Product likes increased!')
 
 

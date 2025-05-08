@@ -7,8 +7,11 @@ services:
       - 8000:8000
     volumes:
       - .:/app
+      - static_volume:/home/app/staticfiles
     depends_on:
       - db
+    networks:
+      - shared-network
 
   queue:
     build:
@@ -17,6 +20,8 @@ services:
     command: 'python -u consumer.py'
     depends_on:
       - db
+    networks:
+      - shared-network
 
   db:
     container_name: file_server_db
@@ -28,6 +33,13 @@ services:
       - .env.prod.db
     ports:
       - "5432:5432"
+    networks:
+      - shared-network
+
 
 volumes:
   postgres_data:
+  static_volume:
+networks:
+  shared-network:
+    external: true

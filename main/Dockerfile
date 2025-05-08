@@ -22,6 +22,6 @@ COPY ./entrypoint.sh /home/app/entrypoint.sh
 RUN chmod +x /home/app/entrypoint.sh
 # Expose the Django application port
 EXPOSE 5000
-
+ENV FLASK_APP=main.py
 # # Define entrypoint script and default arguments
 # CMD ["/home/app/entrypoint.sh"]
