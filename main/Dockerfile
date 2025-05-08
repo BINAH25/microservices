@@ -1,4 +1,3 @@
-
 FROM python:alpine
 
 WORKDIR /home/app
@@ -11,17 +10,10 @@ ENV PYTHONUNBUFFERED=1
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
-
-# Copy project files
 COPY . /home/app
 
-# Copy entrypoint script
-COPY ./entrypoint.sh /home/app/entrypoint.sh
-
-# Give execute permissions to entrypoint script
-RUN chmod +x /home/app/entrypoint.sh
-# Expose the Django application port
 EXPOSE 5000
 ENV FLASK_APP=main.py
-# # Define entrypoint script and default arguments
-# CMD ["/home/app/entrypoint.sh"]
+
+# Define commands directly with conditional migration initialization
+ENTRYPOINT ["sh", "-c", "if [ ! -d 'migrations' ]; then flask db init; else echo 'Migrations directory exists, skipping init'; fi && flask db migrate -m 'Auto migration' && flask db upgrade && python main.py"]

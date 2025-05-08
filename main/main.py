@@ -39,11 +39,11 @@ class ProductUser(db.Model):
     UniqueConstraint('user_id', 'product_id', name='user_product_unique')
 
 
-@app.route('/api/products')
+@app.route('/flask/api/products')
 def index():
     return jsonify(db.session.query(Product).all())
 
-@app.route('/api/products/<int:id>/like', methods=['POST'])
+@app.route('/flask/api/products/<int:id>/like', methods=['POST'])
 def like(id):
     req = requests.get('http://admin-backend-1:8000/api/user')
 

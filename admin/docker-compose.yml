@@ -16,8 +16,7 @@ services:
   queue:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: 'python -u consumer.py'
+      dockerfile: Dockerfile.queue
     depends_on:
       - db
     networks:
@@ -40,6 +39,9 @@ services:
 volumes:
   postgres_data:
   static_volume:
+
 networks:
   shared-network:
     external: true
+
+    
