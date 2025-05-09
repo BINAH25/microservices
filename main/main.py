@@ -7,11 +7,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import UniqueConstraint
 from flask_migrate import Migrate
+from prometheus_flask_exporter import PrometheusMetrics
+
 from producer import publish
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+pymysql://root:root@db/main'
 CORS(app)
+metrics = PrometheusMetrics(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
