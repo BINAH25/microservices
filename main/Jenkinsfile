@@ -8,12 +8,12 @@ pipeline {
 
     environment {
         ECR_REGISTRY = credentials('ecr-registry')
-        ECR_REPOSITORY = credentials('admin-service')
+        ECR_REPOSITORY = credentials('user-service')
         AWS_REGION = credentials('aws-region')
-        QUEUE_REPO = credentials('admin-service-queue')
+        QUEUE_REPO = credentials('user-service-queue')
         
         registryCredential = "ecr:${AWS_REGION}:awscreds"
-        djangoRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
+        flaskRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
         cluster = 'frontend-cluster'
@@ -29,14 +29,13 @@ pipeline {
             }
         }
 
-// admin service Jenkins Pipeline
         stage('SonarQube analysis') {
-            when { changeset "admin/*"}
+            when { changeset "main/*"}
             environment {
                 scannerHome = tool 'sonar'
             }
             steps {
-                dir('admin') {
+                dir('main') {
                     withSonarQubeEnv('sonar') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
@@ -45,7 +44,7 @@ pipeline {
         }
 
         stage('Quality Gate') {
-            when { changeset "admin/*"}
+            when { changeset "main/*"}
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -54,28 +53,28 @@ pipeline {
         }
 
         stage('Build App Images') {
-            when { changeset "admin/*" }
+            when { changeset "main/*" }
             steps {
                 script {
-                    djangoImage = docker.build("${djangoRegistry}:$BUILD_NUMBER", "./admin/")
-                    queueImage = docker.build("${queueRegistry}:$BUILD_NUMBER", "-f ./admin/Dockerfile.queue ./admin/")
+                    flaskImage = docker.build("${flaskRegistry}:$BUILD_NUMBER", "./main/")
+                    queueImage = docker.build("${queueRegistry}:$BUILD_NUMBER", "-f ./main/Dockerfile.queue ./main/")
                 }
             }
         }
 
-        stage('Scan Django Image with Trivy') {
-            when { changeset "admin/*"}
+        stage('Scan Flask Image with Trivy') {
+            when { changeset "main/*"}
             steps {
                 script {
                     sh """
-                        trivy image --format table --severity HIGH,CRITICAL ${djangoRegistry}:$BUILD_NUMBER || exit 1
+                        trivy image --format table --severity HIGH,CRITICAL ${flaskRegistry}:$BUILD_NUMBER || exit 1
                     """
                 }
             }
         }
 
         stage('Scan Queue Image with Trivy') {
-            when { changeset "admin/*"}
+            when { changeset "main/*"}
             steps {
                 script {
                     sh """
@@ -89,8 +88,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry(registryUrl, registryCredential) {
-                        djangoImage.push("$BUILD_NUMBER")
-                        djangoImage.push('latest')
+                        flaskImage.push("$BUILD_NUMBER")
+                        flaskImage.push('latest')
 
                         queueImage.push("$BUILD_NUMBER")
                         queueImage.push('latest')
