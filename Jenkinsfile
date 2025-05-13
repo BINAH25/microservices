@@ -22,7 +22,7 @@ pipeline {
 
         stage('Fetch code') {
             steps {
-                git branch: 'main', url: 'https://github.com/BINAH25/microservices-react.git'
+                git branch: 'main', url: 'https://github.com/BINAH25/python-microservices.git'
             }
         }
 
