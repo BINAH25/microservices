@@ -86,6 +86,7 @@ pipeline {
         }
 
         stage('Upload Images to ECR') {
+            when { changeset "main/*"}
             steps {
                 script {
                     docker.withRegistry(registryUrl, registryCredential) {
