@@ -7,12 +7,14 @@ pipeline {
 
     environment {
         ECR_REGISTRY = credentials('ecr-registry')
-        ECR_REPOSITORY = credentials('ecr-repository')
+        ECR_REPOSITORY = credentials('admin-service')
         AWS_REGION = credentials('aws-region')
+        QUEUE_REPO = credentials('admin-service-queue')
         
         registryCredential = "ecr:${AWS_REGION}:awscreds"
-        appRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
-        frontendRegistry = "https://${ECR_REGISTRY}"
+        djangoRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
+        queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
+        registryUrl = "https://${ECR_REGISTRY}"
         cluster = 'frontend-cluster'
         service = 'frontend-cluster-service'
     }
@@ -50,38 +52,52 @@ pipeline {
             }
         }
 
-        stage('Buid App Image') {
-            when { changeset "admin/*"}
+        stage('Build App Images') {
+            when { changeset "admin/*" }
             steps {
                 script {
-                    dockerImage = docker.build( appRegistry + ":$BUILD_NUMBER", "./admin/")
+                    djangoImage = docker.build("${djangoRegistry}:$BUILD_NUMBER", "./admin/")
+                    queueImage = docker.build("${queueRegistry}:$BUILD_NUMBER", "-f ./admin/Dockerfile.queue ./admin/")
                 }
             }
         }
 
-
-        stage('Scan Image with Trivy') {
+        stage('Scan Django Image with Trivy') {
             when { changeset "admin/*"}
             steps {
                 script {
                     sh """
-                        trivy image --format table --severity HIGH,CRITICAL ${appRegistry}:$BUILD_NUMBER || exit 1
+                        trivy image --format table --severity HIGH,CRITICAL ${djangoRegistry}:$BUILD_NUMBER || exit 1
                     """
                 }
             }
         }
 
+        stage('Scan Queue Image with Trivy') {
+            when { changeset "admin/*"}
+            steps {
+                script {
+                    sh """
+                        trivy image --format table --severity HIGH,CRITICAL ${queueRegistry}:$BUILD_NUMBER || exit 1
+                    """
+                }
+            }
+        }
 
-        // stage('Upload Image to ECR') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry( frontendRegistry, registryCredential ){
-        //                 dockerImage.push("$BUILD_NUMBER")
-        //                 dockerImage.push('latest')
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Upload Images to ECR') {
+            steps {
+                script {
+                    docker.withRegistry(registryUrl, registryCredential) {
+                        djangoImage.push("$BUILD_NUMBER")
+                        djangoImage.push('latest')
+
+                        queueImage.push("$BUILD_NUMBER")
+                        queueImage.push('latest')
+                    }
+                }
+            }
+        }
+
 
         // stage('Deploy to ecs') {
         //     steps {
@@ -101,13 +117,10 @@ pipeline {
                 def gitAuthor = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
                 def gitCommitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                 def buildDuration = currentBuild.durationString.replace(' and counting', '')
-                def buildStatus = currentBuild.currentResult
-                def imageTag = "${appRegistry}:${BUILD_NUMBER}"
-                
+                def buildStatus = currentBuild.currentResult                
                 //Slack message
                 def slackMessage = """
                 :jenkins: *${buildStatus}*: Job `${env.JOB_NAME}` #${env.BUILD_NUMBER}
-                *Repository:* ${ECR_REPOSITORY}
                 *Image Tag:* ${BUILD_NUMBER}
                 *Git Commit:* ${gitCommitShort} | ${gitCommitMsg}
                 *Author:* ${gitAuthor}
