@@ -16,8 +16,9 @@ pipeline {
         djangoRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
-        cluster = 'frontend-cluster'
-        service = 'frontend-cluster-service'
+        cluster = 'micro-service-cluster'
+        adminservice = 'django'
+        queueservice = 'django-queue'
     }
 
    
@@ -101,13 +102,23 @@ pipeline {
         }
 
 
-        // stage('Deploy to ecs') {
-        //     steps {
-        //         withAWS(credentials: 'awscreds', region: 'eu-west-1') {
-        //             sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
-        //         }
-        //     }
-        // }
+        stage('Deploy Admin Image to ecs') {
+            when { changeset "admin/*"}
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${adminservice} --force-new-deployment'
+                }
+            }
+        }
+
+        stage('Deploy Queue Image to ecs') {
+            when { changeset "admin/*"}
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${queueservice} --force-new-deployment'
+                }
+            }
+        }
     }
 
     post {
