@@ -32,7 +32,6 @@ pipeline {
 
 // admin service Jenkins Pipeline
         stage('SonarQube analysis') {
-            when { changeset "admin/*"}
             environment {
                 scannerHome = tool 'sonar'
             }
@@ -46,7 +45,6 @@ pipeline {
         }
 
         stage('Quality Gate') {
-            when { changeset "admin/*"}
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -55,7 +53,6 @@ pipeline {
         }
 
         stage('Build App Images') {
-            when { changeset "admin/*" }
             steps {
                 script {
                     djangoImage = docker.build("${djangoRegistry}:$BUILD_NUMBER", "./admin/")
@@ -65,7 +62,6 @@ pipeline {
         }
 
         stage('Scan Django Image with Trivy') {
-            when { changeset "admin/*"}
             steps {
                 script {
                     sh """
@@ -76,7 +72,6 @@ pipeline {
         }
 
         stage('Scan Queue Image with Trivy') {
-            when { changeset "admin/*"}
             steps {
                 script {
                     sh """
@@ -87,7 +82,6 @@ pipeline {
         }
 
         stage('Upload Images to ECR') {
-            when { changeset "admin/*"}
             steps {
                 script {
                     docker.withRegistry(registryUrl, registryCredential) {
@@ -103,7 +97,6 @@ pipeline {
 
 
         stage('Deploy Admin Image to ecs') {
-            when { changeset "admin/*"}
             steps {
                 withAWS(credentials: 'awscreds', region: 'us-east-2') {
                     sh 'aws ecs update-service --cluster ${cluster} --service ${adminservice} --force-new-deployment'
@@ -112,7 +105,6 @@ pipeline {
         }
 
         stage('Deploy Queue Image to ecs') {
-            when { changeset "admin/*"}
             steps {
                 withAWS(credentials: 'awscreds', region: 'us-east-2') {
                     sh 'aws ecs update-service --cluster ${cluster} --service ${queueservice} --force-new-deployment'
