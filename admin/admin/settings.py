@@ -19,18 +19,18 @@ import requests
 
 
 
-def get_current_region():
-    try:
-        response = requests.get(
-            "http://169.254.169.254/latest/dynamic/instance-identity/document",
-            timeout=2
-        )
-        region = response.json().get("region")
-        if region:
-            print(f"Detected region from metadata: {region}")
-            return region
-    except Exception as e:
-        print(f"Metadata fallback failed: {e}")
+# def get_current_region():
+#     try:
+#         response = requests.get(
+#             "http://169.254.169.254/latest/dynamic/instance-identity/document",
+#             timeout=2
+#         )
+#         region = response.json().get("region")
+#         if region:
+#             print(f"Detected region from metadata: {region}")
+#             return region
+#     except Exception as e:
+#         print(f"Metadata fallback failed: {e}")
 
 
 def get_database_secrets():
