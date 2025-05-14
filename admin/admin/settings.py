@@ -19,34 +19,34 @@ import requests
 
 
 
-# def get_current_region():
-#     try:
-#         response = requests.get(
-#             "http://169.254.169.254/latest/dynamic/instance-identity/document",
-#             timeout=2
-#         )
-#         region = response.json().get("region")
-#         if region:
-#             print(f"Detected region from metadata: {region}")
-#             return region
-#     except Exception as e:
-#         print(f"Metadata fallback failed: {e}")
+def get_current_region():
+    try:
+        response = requests.get(
+            "http://169.254.169.254/latest/dynamic/instance-identity/document",
+            timeout=2
+        )
+        region = response.json().get("region")
+        if region:
+            print(f"Detected region from metadata: {region}")
+            return region
+    except Exception as e:
+        print(f"Metadata fallback failed: {e}")
 
 
-# def get_database_secrets():
-#     current_region = get_current_region()
-#     secret_name = f"dr-project-secret-key-{current_region}"
-#     print(f"print current region: {current_region}")
+def get_database_secrets():
+    current_region = get_current_region()
+    secret_name = f"dr-project-secret-key-{current_region}"
+    print(f"print current region: {current_region}")
 
-#     try:
-#         print(f"Fetching secret: {secret_name}")
-#         client = boto3.client("secretsmanager", region_name=current_region)
-#         response = client.get_secret_value(SecretId=secret_name)
-#         return json.loads(response["SecretString"])
-#     except ClientError as e:
-#         print(f"Failed to fetch secret: {e}")
-#         raise RuntimeError("Could not retrieve DB credentials")
-# secrets = get_database_secrets()
+    try:
+        print(f"Fetching secret: {secret_name}")
+        client = boto3.client("secretsmanager", region_name=current_region)
+        response = client.get_secret_value(SecretId=secret_name)
+        return json.loads(response["SecretString"])
+    except ClientError as e:
+        print(f"Failed to fetch secret: {e}")
+        raise RuntimeError("Could not retrieve DB credentials")
+secrets = get_database_secrets()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -115,11 +115,11 @@ WSGI_APPLICATION = 'admin.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("SQL_DATABASE", "hello_django_prod"),
-        "USER": os.environ.get("SQL_USER", "hello_django"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "hello_django"),
-        "HOST": os.environ.get("SQL_HOST", "db"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
+        "NAME": secrets.get("dbname", os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3")),
+        "USER": secrets.get("username", os.environ.get("SQL_USER", "user")),
+        "PASSWORD": secrets.get("password", os.environ.get("SQL_PASSWORD", "password")),
+        "HOST": secrets.get("host", os.environ.get("SQL_HOST", "localhost")),
+        "PORT": secrets.get("port", os.environ.get("SQL_PORT", "5432")),
     }
 }
 # Password validation
