@@ -34,9 +34,8 @@ def get_current_region():
 
 
 def get_database_secrets():
-    current_region = get_current_region()
-    secret_name = f"my-django-db-secret-{current_region}"
-    print(f"print current region: {current_region}")
+    current_region = "us-east-2"
+    secret_name = "my-django-db-secret-us-east-2"
 
     try:
         print(f"Fetching secret: {secret_name}")
