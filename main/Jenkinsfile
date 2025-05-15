@@ -17,8 +17,8 @@ pipeline {
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
         cluster = 'micro-service-cluster'
-        userservice = 'flask'
-        userservice = 'flask-queue'
+        mainservice = 'flask'
+        queueservice = 'flask-queue'
     }
 
     stages {
@@ -100,13 +100,23 @@ pipeline {
         }
 
 
-        // stage('Deploy to ecs') {
-        //     steps {
-        //         withAWS(credentials: 'awscreds', region: 'eu-west-1') {
-        //             sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
-        //         }
-        //     }
-        // }
+        stage('Deploy User Main to ecs') {
+            when { changeset "main/*"}
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${mainservice} --force-new-deployment'
+                }
+            }
+        }
+
+        stage('Deploy User Main to ecs') {
+            when { changeset "main/*"}
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${queueservice} --force-new-deployment'
+                }
+            }
+        }
     }
 
     post {

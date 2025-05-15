@@ -1,4 +1,3 @@
-
 FROM python:alpine
 
 # Create a group and user
