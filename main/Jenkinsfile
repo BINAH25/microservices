@@ -21,7 +21,6 @@ pipeline {
         userservice = 'flask-queue'
     }
 
-   
     stages {
 
         stage('Fetch code') {
