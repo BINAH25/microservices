@@ -30,13 +30,6 @@ EXPOSE 5000
 
 # Entry command to handle migrations safely
 ENTRYPOINT ["sh", "-c", "\
-  mkdir -p migrations && \
-  chmod -R u+w migrations && \
-  if [ ! -d 'migrations/versions' ]; then \
-    flask db init; \
-  else \
-    echo 'Migrations directory exists, skipping init'; \
-  fi && \
   flask db migrate -m 'Auto migration' && \
   flask db upgrade && \
   python main.py"]
