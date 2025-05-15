@@ -16,8 +16,9 @@ pipeline {
         flaskRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
-        cluster = 'frontend-cluster'
-        service = 'frontend-cluster-service'
+        cluster = 'micro-service-cluster'
+        userservice = 'flask'
+        userservice = 'flask-queue'
     }
 
    
