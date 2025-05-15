@@ -109,7 +109,7 @@ pipeline {
             }
         }
 
-        stage('Deploy User Main to ecs') {
+        stage('Deploy User Queue to ecs') {
             when { changeset "main/*"}
             steps {
                 withAWS(credentials: 'awscreds', region: 'us-east-2') {
