@@ -20,6 +20,7 @@ COPY --chown=appuser:appgroup . /home/app
 # Change to non-root user
 USER appuser
 
+
 EXPOSE 5000
 CMD ["python", "-u", "consumer.py"]
 #
