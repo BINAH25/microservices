@@ -8,11 +8,35 @@ from flask_cors import CORS
 from sqlalchemy import UniqueConstraint
 from flask_migrate import Migrate
 from prometheus_flask_exporter import PrometheusMetrics
-
 from producer import publish
+import boto3
+import json
+from botocore.exceptions import ClientError
+import os
+
+def get_database_secrets():
+    current_region = "us-east-2"
+    secret_name = "my-flask-db-secret-us-east-2"
+
+    try:
+        print(f"Fetching secret: {secret_name}")
+        client = boto3.client("secretsmanager", region_name=current_region)
+        response = client.get_secret_value(SecretId=secret_name)
+        return json.loads(response["SecretString"])
+    except ClientError as e:
+        print(f"Failed to fetch secret: {e}")
+        raise RuntimeError("Could not retrieve DB credentials")
+secrets = get_database_secrets()
+
+db_user = secrets.get("username", os.environ.get("SQL_USER", "user"))
+db_password = secrets.get("password", os.environ.get("SQL_PASSWORD", "password"))
+db_host = secrets.get("host", os.environ.get("SQL_HOST", "localhost"))
+db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
+db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
+
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+pymysql://root:root@db/main'
+app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 CORS(app)
 metrics = PrometheusMetrics(app)
 
@@ -48,7 +72,7 @@ def index():
 
 @app.route('/flask/api/products/<int:id>/like', methods=['POST'])
 def like(id):
-    req = requests.get('http://admin-backend-1:8000/api/user')
+    req = requests.get('https://django.seyram.site/api/user')
 
     json = req.json()
 
