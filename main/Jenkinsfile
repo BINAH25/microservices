@@ -99,7 +99,6 @@ pipeline {
             }
         }
 
-        
         stage('Deploy User Main to ecs') {
             when { changeset "main/*"}
             steps {
