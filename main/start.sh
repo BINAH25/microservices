@@ -6,6 +6,7 @@ if [ ! -d "migrations/versions" ]; then
     echo "Initializing migrations..."
     flask db init
 fi
+db revision --rev-id=a4bde34a1ddf
 
 # Always try to make migrations (safe if no changes)
 echo "Running migrations..."
@@ -17,3 +18,4 @@ flask db upgrade || echo "Upgrade failed. Possible mismatch in migration history
 # Start the app
 echo "Starting app..."
 python main.py
+
