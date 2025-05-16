@@ -142,7 +142,7 @@ pipeline {
                 """
                 
                 slackSend(
-                    channel: '#micro-service-pipeline',
+                    channel: '#micro-service-pipelines',
                     color: COLOR_MAP[buildStatus],
                     message: slackMessage
                 )
