@@ -15,17 +15,15 @@ RUN pip install -r requirements.txt
 
 # Copy the rest of the application
 COPY . /home/app
+# Copy entrypoint script
+COPY ./start.sh /home/app/start.sh
+
+# Give execute permissions to entrypoint script
+RUN chmod +x /home/app/start.sh
+
 
 EXPOSE 5000
 ENV FLASK_APP=main.py
 
 # ENTRYPOINT using root, with migration logic
-ENTRYPOINT ["sh", "-c", "\
-  if [ ! -d 'migrations' ]; then \
-    flask db init; \
-  else \
-    echo 'Migrations directory exists, skipping init'; \
-  fi && \
-  flask db migrate -m 'Auto migration' && \
-  flask db upgrade && \
-  python main.py"]
+CMD ["/home/app/start.sh"]
