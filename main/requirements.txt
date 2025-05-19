@@ -12,3 +12,8 @@ pymysql
 cryptography
 prometheus-flask-exporter
 gunicorn
+opentelemetry-api 
+opentelemetry-sdk 
+opentelemetry-instrumentation-flask 
+opentelemetry-instrumentation-pika 
+opentelemetry-exporter-jaeger-thrift

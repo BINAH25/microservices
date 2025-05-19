@@ -17,6 +17,29 @@ import json
 from pathlib import Path
 import requests
 
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.pika import PikaInstrumentor
+
+
+# OpenTelemetry configuration
+# Jaeger exporter configuration
+jaeger_exporter = JaegerExporter(
+    agent_host_name="13.58.193.105",  # Replace with your Jaeger agent's IP
+    agent_port=6831,
+)
+
+# Setup the tracer provider and add the Jaeger exporter
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(jaeger_exporter))
+
+# Instrument Django and RabbitMQ (Pika)
+DjangoInstrumentor().instrument()
+PikaInstrumentor().instrument()
+
 
 def get_database_secrets():
     current_region = "us-east-2"
