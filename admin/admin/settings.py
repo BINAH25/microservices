@@ -16,7 +16,6 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 trace.set_tracer_provider(
     TracerProvider(resource=Resource.create({SERVICE_NAME: "django-service"}))
 )
-
 # Set up the OTLP exporter
 otlp_exporter = OTLPSpanExporter(
     endpoint="http://18.223.210.250:4317",
@@ -30,7 +29,6 @@ trace.get_tracer_provider().add_span_processor(
 
 # Instrument Django
 DjangoInstrumentor().instrument()
-
 
 def get_database_secrets():
     current_region = "us-east-2"
