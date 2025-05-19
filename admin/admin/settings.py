@@ -16,6 +16,22 @@ import os
 import json
 from pathlib import Path
 import requests
+from opentelemetry import trace
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+trace.set_tracer_provider(
+    TracerProvider(resource=Resource.create({SERVICE_NAME: "django-service"}))
+)
+
+trace.get_tracer_provider().add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="http://18.223.210.250:4317", insecure=True))
+)
+
+DjangoInstrumentor().instrument()
 
 
 def get_database_secrets():
