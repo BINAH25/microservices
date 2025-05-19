@@ -9,6 +9,8 @@ boto3
 requests
 django-prometheus
 prometheus-client
-opentelemetry-distro
-opentelemetry-exporter-otlp
+opentelemetry-distro 
+opentelemetry-exporter-otlp 
+opentelemetry-exporter-otlp-proto-grpc 
+opentelemetry-sdk 
 opentelemetry-instrumentation-django
