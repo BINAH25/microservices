@@ -33,7 +33,6 @@ trace.get_tracer_provider().add_span_processor(
 
 DjangoInstrumentor().instrument()
 
-
 def get_database_secrets():
     current_region = "us-east-2"
     secret_name = "my-django-db-secret-us-east-2"
