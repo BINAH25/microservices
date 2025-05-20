@@ -19,13 +19,19 @@ import requests
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.pika import PikaInstrumentor
 
 
 # OpenTelemetry configuration
+# Set service name
+resource = Resource(attributes={
+    SERVICE_NAME: "django-service"
+})
+
 # Jaeger exporter configuration
 jaeger_exporter = JaegerExporter(
     agent_host_name="13.58.193.105",  # Replace with your Jaeger agent's IP
@@ -33,8 +39,8 @@ jaeger_exporter = JaegerExporter(
 )
 
 # Setup the tracer provider and add the Jaeger exporter
-trace.set_tracer_provider(TracerProvider())
-trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(jaeger_exporter))
+trace.set_tracer_provider(TracerProvider(resource=resource))
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(jaeger_exporter))
 
 # Instrument Django and RabbitMQ (Pika)
 DjangoInstrumentor().instrument()
@@ -129,6 +135,16 @@ DATABASES = {
         "PORT": secrets.get("port", os.environ.get("SQL_PORT", "5432")),
     }
 }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.postgresql"),
+#         "NAME": "hello_django_prod",
+#         "USER": os.environ.get("SQL_USER", "hello_django"),
+#         "PASSWORD":os.environ.get("SQL_PASSWORD", "hello_django"),
+#         "HOST": os.environ.get("SQL_HOST", "db"),
+#         "PORT": os.environ.get("SQL_PORT", "5432"),
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 

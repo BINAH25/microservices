@@ -17,3 +17,4 @@ opentelemetry-sdk
 opentelemetry-instrumentation-flask 
 opentelemetry-instrumentation-pika 
 opentelemetry-exporter-jaeger-thrift
+opentelemetry-instrumentation-requests

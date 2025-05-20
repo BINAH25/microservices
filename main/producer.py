@@ -1,6 +1,7 @@
 import pika, json
 from opentelemetry import trace
 from opentelemetry.trace import set_span_in_context
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 # Initialize tracer
 tracer = trace.get_tracer(__name__)
@@ -14,15 +15,19 @@ def publish(method, body):
 
         # Start a new span for publishing the message
         with tracer.start_as_current_span("publish_message") as span:
+            headers = {}
+            # Inject trace context into headers
+            TraceContextTextMapPropagator().inject(headers)
+
             properties = pika.BasicProperties(
-                method,
-                headers=span.context.to_headers()  # Propagate trace context here
+                content_type=method,
+                headers=headers  # Propagate trace context here
             )
 
             channel.basic_publish(
                 exchange='',
                 routing_key='admin',
-                body=json.dumps(body),
+                body=json.dumps(body), 
                 properties=properties
             )
     except Exception as e:

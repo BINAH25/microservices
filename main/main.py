@@ -19,22 +19,28 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 
-# Setup Jaeger exporter
-resource = Resource({SERVICE_NAME: "flask_service"})
+# Set up tracing
+resource = Resource(attributes={SERVICE_NAME: "flask_service"})
+provider = TracerProvider(resource=resource)
+trace.set_tracer_provider(provider)
+
 jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",  # Replace with your Jaeger agent's IP
+    agent_host_name="13.58.193.105",
     agent_port=6831,
 )
-trace.set_tracer_provider(TracerProvider(resource=resource))
-trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(jaeger_exporter))
+provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
 
-# Initialize Flask app and instrumentation
+tracer = trace.get_tracer(__name__)
+
+# --- Flask App Setup ---
 app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app)
+FlaskInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument()
+
+
 
 def get_database_secrets():
     current_region = "us-east-2"
@@ -59,6 +65,8 @@ db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
 db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@db:3308/main"
+
 CORS(app)
 metrics = PrometheusMetrics(app)
 

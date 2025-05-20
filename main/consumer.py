@@ -1,11 +1,29 @@
 import pika, json
 from main import app, Product, db
 from opentelemetry import trace
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-from opentelemetry.context import attach, detach
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
-# Initialize tracer
+# Match the same service name
+resource = Resource(attributes={
+    SERVICE_NAME: "flask_service"  # Same as main.py
+})
+
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer_provider = trace.get_tracer_provider()
+
+jaeger_exporter = JaegerExporter(
+    agent_host_name="13.58.193.105",
+    agent_port=6831,
+)
+tracer_provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
+
+# Now get the tracer
 tracer = trace.get_tracer(__name__)
+
 
 params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
 connection = pika.BlockingConnection(params)
@@ -18,11 +36,11 @@ def callback(ch, method, properties, body):
     data = json.loads(body)
     print(data)
 
-    with app.app_context(): 
-        # Extract trace context from message headers
-        context = TraceContextTextMapPropagator().extract(properties.headers or {})
+    # Extract trace context
+    ctx = TraceContextTextMapPropagator().extract(properties.headers or {})
 
-        with tracer.start_as_current_span("process_message", context=context):
+    with tracer.start_as_current_span("process_message", context=ctx):
+        with app.app_context():
             if properties.content_type == 'product_created':
                 product = Product(id=data['id'], title=data['title'], image=data['image'])
                 db.session.add(product)
@@ -45,6 +63,4 @@ def callback(ch, method, properties, body):
 channel.basic_consume(queue='main', on_message_callback=callback, auto_ack=True)
 
 print('Started Consuming')
-
 channel.start_consuming()
-channel.close()

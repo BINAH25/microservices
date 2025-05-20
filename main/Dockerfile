@@ -27,3 +27,12 @@ ENV FLASK_APP=main.py
 
 # ENTRYPOINT using root, with migration logic
 CMD ["/home/app/start.sh"]
+# ENTRYPOINT ["sh", "-c", "\
+#   if [ ! -d 'migrations' ]; then \
+#     flask db init; \
+#   else \
+#     echo 'Migrations directory exists, skipping init'; \
+#   fi && \
+#   flask db migrate -m 'Auto migration' && \
+#   flask db upgrade && \
+#   python main.py"]
