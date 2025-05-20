@@ -33,8 +33,6 @@ db_password = secrets.get("password", os.environ.get("SQL_PASSWORD", "password")
 db_host = secrets.get("host", os.environ.get("SQL_HOST", "localhost"))
 db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
 db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
-print("################################### printing ########################")
-print(f"Connecting as: {db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://louis:Louis123@mysql-db.c3i28oi203gi.us-east-2.rds.amazonaws.com:3306/main"
