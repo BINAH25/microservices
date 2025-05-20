@@ -36,7 +36,7 @@ db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
 print("################################### printing ########################")
 print(db_host)
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 CORS(app)
 metrics = PrometheusMetrics(app)
 
