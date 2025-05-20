@@ -34,7 +34,8 @@ db_host = secrets.get("host", os.environ.get("SQL_HOST", "localhost"))
 db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
 db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
 print("################################### printing ########################")
-print(db_host)
+print(f"Connecting as: {db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 CORS(app)
