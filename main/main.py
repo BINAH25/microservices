@@ -37,7 +37,7 @@ print("################################### printing ########################")
 print(f"Connecting as: {db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "louis:Louis123@mysql-db.c3i28oi203gi.us-east-2.rds.amazonaws.com/main"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://louis:Louis123@mysql-db.c3i28oi203gi.us-east-2.rds.amazonaws.com:3306/main"
 CORS(app)
 metrics = PrometheusMetrics(app)
 
