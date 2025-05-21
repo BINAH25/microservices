@@ -84,7 +84,7 @@ The project consists of two main microservices:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/python-microservices-1.git
+   git clone https://github.com/BINAH25/python-microservices.git
    cd python-microservices-1
    ```
 
