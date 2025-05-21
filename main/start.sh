@@ -6,7 +6,7 @@ if [ ! -d "migrations/versions" ]; then
     echo "Initializing migrations..."
     flask db init
 fi
-flask db revision --rev-id=eef4f8759088
+flask db revision --rev-id=a4bde34a1ddf
 
 # Always try to make migrations (safe if no changes)
 echo "Running migrations..."

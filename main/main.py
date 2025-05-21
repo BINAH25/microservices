@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass
 
 import requests
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import UniqueConstraint
@@ -12,34 +12,8 @@ from producer import publish
 import boto3
 import json
 from botocore.exceptions import ClientError
-
-# OpenTelemetry imports
-from opentelemetry import trace
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME
-
-# Set up tracing
-resource = Resource(attributes={SERVICE_NAME: "flask_service"})
-provider = TracerProvider(resource=resource)
-trace.set_tracer_provider(provider)
-
-jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",
-    agent_port=6831,
-)
-provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
-
-tracer = trace.get_tracer(__name__)
-
-# --- Flask App Setup ---
-app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app, tracer_provider=provider)
-RequestsInstrumentor().instrument()
-
+import os
+from flask_swagger_ui import get_swaggerui_blueprint
 
 def get_database_secrets():
     current_region = "us-east-2"
@@ -61,7 +35,7 @@ db_host = secrets.get("host", os.environ.get("SQL_HOST", "localhost"))
 db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
 db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
 
-
+app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 CORS(app)
 metrics = PrometheusMetrics(app)
@@ -69,12 +43,28 @@ metrics = PrometheusMetrics(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# Configure Swagger UI
+# SWAGGER_URL = '/swagger'
+# API_URL = '/static/swagger.json'
+# swaggerui_blueprint = get_swaggerui_blueprint(
+#     SWAGGER_URL,
+#     API_URL,
+#     config={
+#         'app_name': "Main Microservice API"
+#     }
+# )
+# app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+# @app.route('/static/swagger.json')
+# def send_swagger_json():
+#     return send_from_directory('swagger', 'swagger.json')
+
 @dataclass
 class Product(db.Model):
     # for serializing into json
-    id: int 
-    title: str 
-    image: str 
+    id: int
+    title: str
+    image: str
 
     # for db
     id = db.Column(db.Integer, primary_key=True, autoincrement=False) # product_id created in django
@@ -94,17 +84,40 @@ class ProductUser(db.Model):
 
 @app.route('/flask/api/products')
 def index():
-    with tracer.start_as_current_span("get_all_products"):
-        return jsonify(db.session.query(Product).all())
+    """
+    Get all products
+    ---
+    responses:
+      200:
+        description: List of all products
+    """
+    return jsonify(db.session.query(Product).all())
 
 @app.route('/flask/api/products/<int:id>/like', methods=['POST'])
 def like(id):
-    with tracer.start_as_current_span("like_product"):
-        req = requests.get('https://django.seyram.site/api/user')
-        json_data = req.json()
+    """
+    Like a product
+    ---
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: ID of the product to like
+    responses:
+      200:
+        description: Product liked successfully
+      400:
+        description: You already liked this product
+      404:
+        description: Product not found
+    """
+    req = requests.get('https://django.seyram.site/api/user')
+
+    json = req.json()
 
     try:
-        product_user = ProductUser(user_id=json_data['id'], product_id=id)
+        product_user = ProductUser(user_id=json['id'], product_id=id)
         db.session.add(product_user)
         db.session.commit()
 
@@ -117,9 +130,32 @@ def like(id):
         'message': 'success'
     })
 
-@app.route('/ready')
-def readiness_check():
-    return jsonify({'status': 'ok'}), 200
+@app.route('/flask/api/health', methods=['GET'])
+def health_check():
+    """
+    Health check endpoint
+    ---
+    responses:
+      200:
+        description: Service is healthy
+      500:
+        description: Service is unhealthy
+    """
+    try:
+        # Check database connection
+        db.session.execute('SELECT 1')
+        return jsonify({
+            'status': 'healthy',
+            'database': 'connected',
+            'service': 'main'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'database': 'disconnected',
+            'error': str(e),
+            'service': 'main'
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='5000')
