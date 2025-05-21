@@ -12,7 +12,34 @@ from producer import publish
 import boto3
 import json
 from botocore.exceptions import ClientError
-import os
+
+# OpenTelemetry imports
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+
+# Set up tracing
+resource = Resource(attributes={SERVICE_NAME: "flask_service"})
+provider = TracerProvider(resource=resource)
+trace.set_tracer_provider(provider)
+
+jaeger_exporter = JaegerExporter(
+    agent_host_name="13.58.193.105",
+    agent_port=6831,
+)
+provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
+
+tracer = trace.get_tracer(__name__)
+
+# --- Flask App Setup ---
+app = Flask(__name__)
+FlaskInstrumentor().instrument_app(app, tracer_provider=provider)
+RequestsInstrumentor().instrument()
+
 
 def get_database_secrets():
     current_region = "us-east-2"
@@ -34,7 +61,7 @@ db_host = secrets.get("host", os.environ.get("SQL_HOST", "localhost"))
 db_port = secrets.get("port", os.environ.get("SQL_PORT", "3306"))
 db_name = secrets.get("dbname", os.environ.get("SQL_DATABASE", "main"))
 
-app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 CORS(app)
 metrics = PrometheusMetrics(app)
@@ -67,16 +94,17 @@ class ProductUser(db.Model):
 
 @app.route('/flask/api/products')
 def index():
-    return jsonify(db.session.query(Product).all())
+    with tracer.start_as_current_span("get_all_products"):
+        return jsonify(db.session.query(Product).all())
 
 @app.route('/flask/api/products/<int:id>/like', methods=['POST'])
 def like(id):
-    req = requests.get('https://django.seyram.site/api/user')
-
-    json = req.json()
+    with tracer.start_as_current_span("like_product"):
+        req = requests.get('https://django.seyram.site/api/user')
+        json_data = req.json()
 
     try:
-        product_user = ProductUser(user_id=json['id'], product_id=id)
+        product_user = ProductUser(user_id=json_data['id'], product_id=id)
         db.session.add(product_user)
         db.session.commit()
 
