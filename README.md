@@ -2,6 +2,8 @@
 
 This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service. The system uses RabbitMQ for message queuing and MySQL for data persistence.
 
+![image](./resources/main.png)
+
 ## Content
 - [Architecture Overview](#architecture-overview)
 - [Technology Stack](#technology-stack)
@@ -534,11 +536,11 @@ The implementation follows several RabbitMQ best practices:
 ```python
 def publish(method, body):
     params = pika.URLParameters('amqps://user:password@host/vhost')
-    
+
     try:
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
-        
+
         properties = pika.BasicProperties(method)
         channel.basic_publish(
             exchange='',
@@ -566,8 +568,8 @@ def callback(ch, method, properties, body):
     product.save()
     print('Product likes increased!')
 
-channel.basic_consume(queue='admin', 
-                     on_message_callback=callback, 
+channel.basic_consume(queue='admin',
+                     on_message_callback=callback,
                      auto_ack=True)
 ```
 
