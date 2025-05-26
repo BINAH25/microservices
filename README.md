@@ -21,6 +21,10 @@ This project implements a microservices architecture using Python, featuring two
   - [OpenTelemetry](#opentelemetry)
   - [Health Checks](#health-checks)
 - [Message Queue Architecture](#message-queue-architecture)
+  - [RabbitMQ Implementation](#rabbitmq-implementation)
+  - [Message Flow](#message-flow)
+  - [Queue Configuration](#queue-configuration)
+  - [Error Handling](#queue-error-handling)
 - [Database Schema](#database-schema)
   - [Main Service](#database-schema-main-service)
   - [Admin Service](#database-schema-admin-service)
@@ -398,15 +402,192 @@ The admin service is instrumented with OpenTelemetry for distributed tracing.
 
 ## Message Queue Architecture
 
-Both services communicate through RabbitMQ using the following exchanges and queues:
+Both services communicate through RabbitMQ using the following message routing:
 
 1. **Main Service:**
-   - Publishes to `product_liked` exchange when a product is liked
-   - Consumes from `admin` queue for updates
+   - Publishes to `admin` queue when a product is liked (with `product_liked` content-type)
+   - Consumes from `main` queue for product create/update/delete events
 
 2. **Admin Service:**
-   - Publishes to `product_created` exchange when a product is created/updated
-   - Consumes from `main` queue for updates
+   - Publishes to `main` queue when products are created/updated/deleted
+   - Consumes from `admin` queue for product like events
+
+This architecture implements the Event-Driven Communication pattern, allowing services to operate independently while maintaining data consistency.
+
+### RabbitMQ Implementation
+
+The project uses RabbitMQ as a message broker to enable asynchronous communication between microservices. RabbitMQ provides reliable message delivery, fault tolerance, and decoupling between services.
+
+#### Service Provider
+
+The project uses CloudAMQP, a fully managed RabbitMQ service that provides:
+- High availability and clustering
+- Secure AMQPS connections (TLS/SSL)
+- Web-based management interface
+- Message persistence
+- Performance monitoring
+
+#### Integration Technology
+
+- **Client Library**: Pika 1.1.0+ (Python RabbitMQ client)
+- **Protocol**: AMQP 0-9-1
+- **Connection Type**: AMQPS (secure)
+- **Serialization Format**: JSON
+
+### Message Flow
+
+The system implements a bidirectional message flow between services:
+
+1. **Product Creation Flow**:
+   - Admin service creates a product in its database
+   - Admin service publishes a `product_created` message to the `main` queue
+   - Main service consumes the message and creates a corresponding product record
+   - No acknowledgment is required (fire-and-forget pattern)
+
+2. **Product Update Flow**:
+   - Admin service updates a product in its database
+   - Admin service publishes a `product_updated` message to the `main` queue
+   - Main service consumes the message and updates its product record
+   - No acknowledgment is required
+
+3. **Product Deletion Flow**:
+   - Admin service deletes a product from its database
+   - Admin service publishes a `product_deleted` message to the `main` queue
+   - Main service consumes the message and deletes its product record
+   - No acknowledgment is required
+
+4. **Product Like Flow**:
+   - Main service records a product like in its database
+   - Main service publishes a message to the `admin` queue
+   - Admin service consumes the message and increments the product's like count
+   - No acknowledgment is required
+
+### Queue Configuration
+
+The RabbitMQ implementation uses the following configuration:
+
+1. **Queues**:
+   - `main`: Receives messages from the Admin service
+   - `admin`: Receives messages from the Main service
+
+2. **Message Properties**:
+   - `content_type`: Used to identify message type (e.g., `product_created`, `product_updated`, `product_deleted`, `product_liked`)
+   - Messages are serialized as JSON strings
+
+3. **Consumer Configuration**:
+   - `auto_ack=True`: Automatic acknowledgment of messages
+   - Single-threaded consumers
+   - No prefetch limit configured
+
+4. **Producer Configuration**:
+   - Direct publishing to queues (no exchanges used)
+   - Connection creation and closing for each publish operation
+   - No persistent messages or publisher confirms
+
+### Queue Error Handling
+
+The system implements several error handling strategies for RabbitMQ:
+
+1. **Connection Error Handling**:
+   - Producers catch connection exceptions and log errors
+   - Producers ensure connections are closed in finally blocks
+   - Consumers would need to be restarted if connections fail
+
+2. **Message Processing Errors**:
+   - Consumers use try/catch blocks around database operations
+   - Failed message processing is logged but not retried (at-most-once delivery)
+
+3. **Deployment Considerations**:
+   - Consumer services run in separate Docker containers
+   - Service restarts are handled by the container orchestration system
+   - Containers have health checks to ensure service availability
+
+### RabbitMQ Best Practices
+
+The implementation follows several RabbitMQ best practices:
+
+1. **Connection Management**:
+   - Each producer creates a new connection for publishing
+   - Consumers maintain long-lived connections
+   - Connections are explicitly closed after use
+   - Connection parameters are centralized
+
+2. **Message Format**:
+   - Consistent JSON serialization across services
+   - Content-type headers for message identification
+   - Simple message structures with minimal payload
+
+3. **Security**:
+   - AMQPS protocol for encrypted communication
+   - Credentials managed through environment variables
+   - CloudAMQP provides TLS/SSL termination
+
+4. **Monitoring & Observability**:
+   - Console logging for message receipt and processing
+   - Error handling with detailed logging
+   - CloudAMQP dashboard for queue monitoring
+
+### Implementation Details
+
+#### Main Service Producer
+
+```python
+def publish(method, body):
+    params = pika.URLParameters('amqps://user:password@host/vhost')
+    
+    try:
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        
+        properties = pika.BasicProperties(method)
+        channel.basic_publish(
+            exchange='',
+            routing_key='admin',
+            body=json.dumps(body),
+            properties=properties
+        )
+    except Exception as e:
+        print('RabbitMQ publish error:', e)
+    finally:
+        try:
+            connection.close()
+        except:
+            pass
+```
+
+#### Admin Service Consumer
+
+```python
+def callback(ch, method, properties, body):
+    print('Received in admin')
+    id = json.loads(body)
+    product = Product.objects.get(id=id)
+    product.likes = product.likes + 1
+    product.save()
+    print('Product likes increased!')
+
+channel.basic_consume(queue='admin', 
+                     on_message_callback=callback, 
+                     auto_ack=True)
+```
+
+### Scaling Considerations
+
+1. **Horizontal Scaling**:
+   - Consumer containers can be scaled independently
+   - CloudAMQP cluster supports high throughput
+   - Message persistence ensures reliability during scaling events
+
+2. **High Availability**:
+   - CloudAMQP provides redundant message brokers
+   - Messages are stored until consumed (even if consumers are down)
+   - Automatic failover capabilities
+
+3. **Future Enhancements**:
+   - Implement dead-letter queues for failed messages
+   - Add message TTL (Time-To-Live) for stale messages
+   - Implement publisher confirms for critical messages
+   - Add message batching for higher throughput
 
 ## Database Schema
 
