@@ -11,12 +11,13 @@ pipeline {
         ECR_REPOSITORY = credentials('user-service')
         AWS_REGION = credentials('aws-region')
         QUEUE_REPO = credentials('user-service-queue')
+        CLUSTER = credentials('cluster')
         
         registryCredential = "ecr:${AWS_REGION}:awscreds"
         flaskRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
-        cluster = 'micro-service-cluster'
+        cluster = "${CLUSTER}"
         mainservice = 'flask'
         queueservice = 'flask-queue'
     }
@@ -25,7 +26,7 @@ pipeline {
 
         stage('Fetch code') {
             steps {
-                git branch: 'main', url: 'https://github.com/BINAH25/python-microservices.git'
+                git branch: 'main', url: 'https://github.com/BINAH25/microservices.git'
             }
         }
 
@@ -102,7 +103,7 @@ pipeline {
         stage('Deploy User Main to ecs') {
             when { changeset "main/*"}
             steps {
-                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                withAWS(credentials: 'awscreds', region: "${AWS_REGION}") {
                     sh 'aws ecs update-service --cluster ${cluster} --service ${mainservice} --force-new-deployment'
                 }
             }
@@ -111,7 +112,7 @@ pipeline {
         stage('Deploy User Queue to ecs') {
             when { changeset "main/*"}
             steps {
-                withAWS(credentials: 'awscreds', region: 'us-east-2') {
+                withAWS(credentials: 'awscreds', region: "${AWS_REGION}") {
                     sh 'aws ecs update-service --cluster ${cluster} --service ${queueservice} --force-new-deployment'
                 }
             }
