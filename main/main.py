@@ -116,8 +116,6 @@ def like(id):
         'message': 'success'
     })
 
-
-
 @app.route('/ready')
 def readiness_check():
     return jsonify({'status': 'ok'}), 200
