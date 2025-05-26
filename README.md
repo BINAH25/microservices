@@ -2,13 +2,16 @@
 
 This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service. The system uses RabbitMQ for message queuing and MySQL for data persistence.
 
-![image](./resources/main.png)
 
 ## Content
 - [Architecture Overview](#architecture-overview)
 - [Technology Stack](#technology-stack)
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
+- [Screenshots](#screenshots)
+  - [Main Service](#screenshots-main-service)
+  - [Admin Service](#screenshots-admin-service)
+  - [RabbitMQ Dashboard](#screenshots-rabbitmq)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -55,6 +58,43 @@ The project consists of two main microservices:
    - Producer-Consumer pattern implementation with RabbitMQ
    - OpenTelemetry integration for observability
    - Prometheus integration for metrics collection
+
+## Application Screenshots
+
+### Frontend Screenshots {#screenshots-main-service}
+![frontend](./resources/main.png)
+<!-- ### Main Service {#screenshots-main-service}
+
+![Main Service Products API](./resources/main.png)
+*The Main Service Products API displaying a list of products*
+
+![Main Service Health Check](/images/main-service-health.png)
+*Health check endpoint showing service status*
+
+![Main Service Metrics](/images/main-service-metrics.png)
+*Prometheus metrics exposed by the Main Service*
+
+### Admin Service {#screenshots-admin-service}
+
+![Admin Dashboard](/images/admin-dashboard.png)
+*Django Admin dashboard for product management*
+
+![Admin Service API](/images/admin-service-api.png)
+*Admin Service REST API for products*
+
+![Admin Service Metrics](/images/admin-metrics.png)
+*Prometheus metrics for the Admin Service*
+
+### RabbitMQ Dashboard {#screenshots-rabbitmq}
+
+![RabbitMQ Overview](/images/rabbitmq-overview.png)
+*CloudAMQP RabbitMQ management dashboard overview*
+
+![Message Queues](/images/rabbitmq-queues.png)
+*Active queues with message counts and consumers*
+
+![Message Flow](/images/rabbitmq-flow.png)
+*Message flow visualization between services* -->
 
 ## Technology Stack
 
