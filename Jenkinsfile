@@ -26,7 +26,7 @@ pipeline {
 
         stage('Fetch code') {
             steps {
-                git branch: 'main', url: 'git@github.com:BINAH25/microservices.git'
+                git branch: 'main', url: 'https://github.com/BINAH25/microservices.git'
             }
         }
 
