@@ -11,12 +11,13 @@ pipeline {
         ECR_REPOSITORY = credentials('admin-service')
         AWS_REGION = credentials('aws-region')
         QUEUE_REPO = credentials('admin-service-queue')
-        
+        CLUSTER = credentials('cluster')
+
         registryCredential = "ecr:${AWS_REGION}:awscreds"
         djangoRegistry = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         queueRegistry = "${ECR_REGISTRY}/${QUEUE_REPO}"
         registryUrl = "https://${ECR_REGISTRY}"
-        cluster = 'micro-service-cluster'
+        cluster = "${CLUSTER}"
         adminservice = 'django'
         queueservice = 'django-queue'
     }
@@ -105,8 +106,13 @@ pipeline {
         stage('Deploy Admin Image to ecs') {
             when { changeset "admin/*"}
             steps {
-                withAWS(credentials: 'awscreds', region: 'us-east-2') {
-                    sh 'aws ecs update-service --cluster ${cluster} --service ${adminservice} --force-new-deployment'
+                withAWS(credentials: 'awscreds', region: "${AWS_REGION}") {
+                    sh """
+                        aws ecs update-service \
+                        --cluster ${cluster} \
+                        --service ${adminservice} \
+                        --force-new-deployment
+                    """
                 }
             }
         }
@@ -114,8 +120,13 @@ pipeline {
         stage('Deploy Queue Image to ecs') {
             when { changeset "admin/*"}
             steps {
-                withAWS(credentials: 'awscreds', region: 'us-east-2') {
-                    sh 'aws ecs update-service --cluster ${cluster} --service ${queueservice} --force-new-deployment'
+                withAWS(credentials: 'awscreds', region: "${AWS_REGION}") {
+                    sh """
+                        aws ecs update-service \
+                        --cluster ${cluster} \
+                        --service ${queueservice} \
+                        --force-new-deployment
+                    """
                 }
             }
         }
