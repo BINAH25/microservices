@@ -91,7 +91,6 @@ class ProductUser(db.Model):
     # not sure if working ?
     UniqueConstraint('user_id', 'product_id', name='user_product_unique')
 
-
 @app.route('/flask/api/products')
 def index():
     with tracer.start_as_current_span("get_all_products"):
@@ -116,6 +115,8 @@ def like(id):
     return jsonify({
         'message': 'success'
     })
+
+
 
 @app.route('/ready')
 def readiness_check():
