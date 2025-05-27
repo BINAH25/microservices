@@ -21,6 +21,7 @@ COPY --chown=appuser:appgroup . /home/app
 COPY --chown=appuser:appgroup ./entrypoint.sh /home/app/entrypoint.sh
 RUN chmod +x /home/app/entrypoint.sh
 
+
 # Change to non-root user
 USER appuser
 

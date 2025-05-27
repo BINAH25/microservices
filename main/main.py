@@ -40,11 +40,15 @@ app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument()
 
+current_region = os.environ.get("AWS_REGION")
+secret_name = os.environ.get("SECRET_NAME")
+
+if not current_region or not secret_name:
+    raise RuntimeError("Missing required environment variables: AWS_REGION or DB_SECRET_NAME")
+
 
 def get_database_secrets():
-    current_region = "us-east-2"
-    secret_name = "my-flask-db-secret-us-east-2"
-
+   
     try:
         print(f"Fetching secret: {secret_name}")
         client = boto3.client("secretsmanager", region_name=current_region)
