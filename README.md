@@ -10,10 +10,10 @@ This project implements a microservices architecture using Python, featuring two
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
 - [Application Screenshots](#application-screenshots)
-  - [Main Service](#screenshots-main-service)
-  - [Admin Service](#screenshots-admin-service)
-  - [RabbitMQ Dashboard](#screenshots-rabbitmq)
-  - [Monitoring Dashboard](#screenshots-monitoring)
+  - [Main Service Screenshot](#main-service-screenshot)
+  - [Admin Service Screenshot](#admin-service-screenshot)
+  - [RabbitMQ Dashboard](#rabbitmq-dashboard)
+  - [Monitoring Dashboard](#monitoring-dashboard)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -70,29 +70,14 @@ The project consists of three main components:
 
 ## Application Screenshots
 
-### Frontend Screenshots {#}
+### Frontend Screenshots
 ![frontend](./resources/main.png)
-### Main Service {#screenshots-main-service}
+### Main Service Screenshots
 
-![Main Service Products API](./resources/main.png)
-*The Main Service Products API displaying a list of products*
-
-![Main Service Health Check](/images/main-service-health.png)
-*Health check endpoint showing service status*
-
-![Main Service Metrics](/images/main-service-metrics.png)
-*Prometheus metrics exposed by the Main Service*
-
-### Admin Service {#screenshots-admin-service}
+### Admin Service Screenshots
 
 ![Admin Dashboard](/images/admin-dashboard.png)
 *Django Admin dashboard for product management*
-
-![Admin Service API](/images/admin-service-api.png)
-*Admin Service REST API for products*
-
-![Admin Service Metrics](/images/admin-metrics.png)
-*Prometheus metrics for the Admin Service*
 
 ### RabbitMQ Dashboard {#screenshots-rabbitmq}
 
