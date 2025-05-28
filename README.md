@@ -1,11 +1,12 @@
 # Python Microservices Architecture
 
-This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service. The system uses RabbitMQ for message queuing and MySQL for data persistence.
+This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service, along with a React frontend. The system uses RabbitMQ for message queuing and MySQL for data persistence.
 
 
 ## Content
 - [Architecture Overview](#architecture-overview)
 - [Technology Stack](#technology-stack)
+  - [Frontend](#frontend)
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
 - [Screenshots](#screenshots)
@@ -45,16 +46,22 @@ This project implements a microservices architecture using Python, featuring two
 
 ## Architecture Overview
 
-The project consists of two main microservices:
+The project consists of three main components:
 
-1. **Main Service** (Flask-based)
+1. **Frontend** (React-based)
+   - User interface for product display and interaction
+   - Admin interface for product management
+   - Responsive design with Bootstrap styling
+   - Communicates with both microservices via REST APIs
+
+2. **Main Service** (Flask-based)
    - RESTful API endpoints for product management
    - Producer-Consumer pattern implementation with RabbitMQ
    - MySQL database integration
    - Prometheus metrics integration for monitoring
    - AWS Secrets Manager integration for database credentials
 
-2. **Admin Service** (Django-based)
+3. **Admin Service** (Django-based)
    - Admin dashboard and management interface
    - REST API using Django REST Framework
    - Producer-Consumer pattern implementation with RabbitMQ
@@ -100,7 +107,7 @@ The project consists of two main microservices:
 
 ### Monitoring Dashboard {#screenshots-monitoring}
 
-![Grafana Dashboard](/images/grafana-dashboard.png)
+![Grafana Dashboard - Django](./resources/grafana-django.png)
 *Grafana dashboard showing service metrics*
 
 ![Prometheus Targets](/images/prometheus-targets.png)
@@ -110,6 +117,51 @@ The project consists of two main microservices:
 *Detailed service performance metrics*
 
 ## Technology Stack
+
+### Frontend
+- **Framework**: React 18.2.0+
+- **Routing**: React Router DOM 6.8.1+
+- **Language**: TypeScript 4.9.5+
+- **Build Tool**: Create React App
+- **Styling**: Bootstrap CSS
+- **Deployment**: Nginx with Docker
+- **HTTP Client**: Native Fetch API
+
+#### Core Components
+
+1. **Main Interface (`/src/main/`)**
+   - Product display with image gallery format
+   - Like functionality that communicates with Main Service
+   - Responsive grid layout using Bootstrap
+   - Real-time UI updates after like actions
+
+2. **Admin Interface (`/src/admin/`)**
+   - Product management dashboard with CRUD operations
+   - Product listing with image preview
+   - Create/Edit forms with input validation
+   - Delete confirmation dialogs
+   - Styled admin layout with navigation
+
+3. **Shared Components**
+   - Navigation bar with routing links
+   - Wrapper component for consistent layouts
+   - TypeScript interfaces for type safety
+   - Environment-based configuration
+
+4. **API Integration**
+   - Communicates with Admin Service for product management
+   - Communicates with Main Service for like functionality
+   - Fetches data using async/await pattern
+   - JSON-based data exchange
+
+#### Frontend Architecture
+
+- **Component-Based Design**: Modular React components with specific responsibilities
+- **TypeScript Integration**: Type-safe code with interfaces for data models
+- **React Router**: Client-side routing for SPA experience
+- **RESTful API Integration**: Direct communication with backend microservices
+- **Responsive Design**: Mobile-friendly UI with Bootstrap
+- **Docker Deployment**: Nginx-based containerized deployment
 
 ### Main Service
 - **Framework**: Flask 1.1.2+
@@ -323,6 +375,26 @@ The project consists of two main microservices:
 │   ├── manage.py            # Django management script
 │   ├── requirements.txt     # Python dependencies
 │   └── docker-compose.yml   # Docker configuration
+│
+├── frontend/                 # Frontend application
+│   └── microservices-react-main/  # React application
+│       ├── react-crud/      # React application code
+│       │   ├── src/         # Source code
+│       │   │   ├── admin/   # Admin interface components
+│       │   │   │   ├── Products.tsx         # Product listing page
+│       │   │   │   ├── ProductsCreate.tsx   # Product creation form
+│       │   │   │   ├── ProductsEdit.tsx     # Product editing form
+│       │   │   │   └── Wrapper.tsx          # Admin layout wrapper
+│       │   │   ├── main/    # Main interface components
+│       │   │   │   └── Main.tsx             # Main product gallery
+│       │   │   ├── interfaces/ # TypeScript interfaces
+│       │   │   │   └── product.ts           # Product data model
+│       │   │   ├── App.tsx  # Main application component with routing
+│       │   │   └── constant.tsx # API endpoint configuration
+│       │   ├── Dockerfile   # Docker configuration for frontend
+│       │   ├── nginx.conf   # Nginx configuration
+│       │   └── package.json # Dependencies and scripts
+│       └── docker-compose.yml # Docker configuration for frontend
 │
 ├── main/                    # Main service (Flask)
 │   ├── main.py             # Main application
@@ -643,17 +715,32 @@ The project consists of two main microservices:
    docker-compose up --build
    ```
 
-5. Start the monitoring stack:
+5. Start the frontend:
+   ```bash
+   cd frontend/microservices-react-main
+   docker-compose up --build
+   ```
+   Access the frontend at http://localhost:80
+
+6. Start the monitoring stack:
    ```bash
    cd grafana-prometheus
    docker-compose up --build
    ```
-   Access Grafana at http://localhost:80 (default credentials: admin/admin)
+   Access Grafana at http://localhost:8080 (default credentials: admin/admin)
    Access Prometheus at http://localhost:9090
 
 ### Manual Setup
 
-1. Set up Python virtual environments:
+1. Set up the frontend:
+   ```bash
+   cd frontend/microservices-react-main/react-crud
+   npm install
+   npm start
+   ```
+   The development server will start at http://localhost:3000
+
+2. Set up Python virtual environments:
    ```bash
    # For main service
    cd main
@@ -719,8 +806,18 @@ The project consists of two main microservices:
 - **GET** `/api/user` - Get a random user ID
 - **GET** `/metrics` - Prometheus metrics endpoint
 
+### Frontend
+- **Main UI**: http://localhost:80 - Product display and like functionality
+  - **GET** `/` - Home page with product gallery
+  - **POST** Action - Like a product (communicates with Main Service)
+- **Admin UI**: http://localhost:80/admin/products - Product management interface
+  - **GET** `/admin/products` - Product listing page
+  - **GET** `/admin/products/create` - Create new product form
+  - **GET** `/admin/products/:id/edit` - Edit existing product form
+  - All admin pages communicate with Admin Service API
+
 ### Monitoring Stack
-- Grafana: http://localhost:80 - Visualization dashboards
+- Grafana: http://localhost:8080 - Visualization dashboards
 - Prometheus: http://localhost:9090 - Metrics and alerts
 
 ## AWS Secrets Manager Integration
@@ -1039,7 +1136,17 @@ The project includes a Jenkins pipeline that:
    - Ensure `shared-network` is created
    - Check container logs for network-related errors
 
-4. **Monitoring Stack Issues**
+4. **Frontend Issues**
+   - Check API endpoint configuration in `src/constant.tsx`
+   - Verify CORS headers are properly set on backend services
+   - Inspect browser console for JavaScript errors
+   - Ensure Nginx configuration is properly routing requests
+   - Check network tab for failed API requests
+   - Verify that the correct environment variables are set
+   - For build issues, check Node.js version compatibility
+   - For styling issues, verify Bootstrap CSS is properly loaded
+
+5. **Monitoring Stack Issues**
    - Verify Prometheus can reach service endpoints
    - Check Prometheus targets page for scraping errors
    - Ensure Grafana can connect to Prometheus data source
@@ -1048,19 +1155,24 @@ The project includes a Jenkins pipeline that:
 ## Development Guidelines
 
 1. **Code Style**
-   - Follow PEP 8 guidelines
-   - Use type hints
+   - Follow PEP 8 guidelines for Python code
+   - Follow ESLint/Prettier rules for JavaScript/TypeScript
+   - Use type hints in Python and TypeScript
    - Write docstrings for all functions and classes
 
 2. **Testing**
    - Write unit tests for new features
    - Maintain test coverage above 80%
    - Run tests before committing
+   - Use Jest for frontend testing
+   - Use pytest for backend testing
 
 3. **Documentation**
    - Update API documentation when making changes
    - Document new environment variables
    - Keep README up to date
+   - Document component props in frontend code
+   - Include JSDoc comments for frontend functions
 
 ## Contributing
 
