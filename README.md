@@ -72,25 +72,13 @@ The project consists of three main components:
 
 ### Frontend Screenshots
 ![frontend](./resources/main.png)
-### Main Service Screenshots
 
-### Admin Service Screenshots
-
-![Admin Dashboard](/images/admin-dashboard.png)
-*Django Admin dashboard for product management*
-
-### RabbitMQ Dashboard {#screenshots-rabbitmq}
+### RabbitMQ Dashboard
 
 ![RabbitMQ Overview](/images/rabbitmq-overview.png)
 *CloudAMQP RabbitMQ management dashboard overview*
 
-![Message Queues](/images/rabbitmq-queues.png)
-*Active queues with message counts and consumers*
-
-![Message Flow](/images/rabbitmq-flow.png)
-*Message flow visualization between services*
-
-### Monitoring Dashboard {#screenshots-monitoring}
+### Monitoring Dashboard
 
 ![Grafana Dashboard - Django](./resources/grafana-django.png)
 *Grafana dashboard showing service metrics*
