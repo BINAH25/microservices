@@ -1,0 +1,16 @@
+
+services:
+  frontend:
+    container_name: web
+    build: ./react-crud
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - shared-network
+
+
+networks:
+  shared-network:
+    external: true
