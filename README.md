@@ -9,7 +9,7 @@ This project implements a microservices architecture using Python, featuring two
   - [Frontend](#frontend)
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
-- [Screenshots](#screenshots)
+- [Application Screenshots](#application-screenshots)
   - [Main Service](#screenshots-main-service)
   - [Admin Service](#screenshots-admin-service)
   - [RabbitMQ Dashboard](#screenshots-rabbitmq)
@@ -70,11 +70,11 @@ The project consists of three main components:
 
 ## Application Screenshots
 
-### Frontend Screenshots
+### Frontend Screenshots {#}
 ![frontend](./resources/main.png)
-### Main Service
+### Main Service {#screenshots-main-service}
 
-![Main Service Products API](./resources/mainfd.png)
+![Main Service Products API](./resources/main.png)
 *The Main Service Products API displaying a list of products*
 
 ![Main Service Health Check](/images/main-service-health.png)
