@@ -70,11 +70,11 @@ The project consists of three main components:
 
 ## Application Screenshots
 
-### Frontend Screenshots {#screenshots-main-service}
+### Frontend Screenshots
 ![frontend](./resources/main.png)
-### Main Service {#screenshots-main-service}
+### Main Service
 
-![Main Service Products API](./resources/main.png)
+![Main Service Products API](./resources/mainfd.png)
 *The Main Service Products API displaying a list of products*
 
 ![Main Service Health Check](/images/main-service-health.png)
