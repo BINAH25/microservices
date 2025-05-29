@@ -12,6 +12,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "admin.settings")
 django.setup()
 
 from products.models import Product
+rabbit_mq_url = os.environ.get("RABBIT_MQ_URL")
+jeager_url = os.environ.get("JAEGAR_URL")
+jeager_port = os.environ.get("JAEGAR_PORT")
 
 # Configure Tracer Provider
 trace.set_tracer_provider(
@@ -20,15 +23,15 @@ trace.set_tracer_provider(
     )
 )
 jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",
-    agent_port=6831,
+    agent_host_name=jeager_url,
+    agent_port=jeager_port,
 )
 trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(jaeger_exporter))
 
 # Get the tracer
 tracer = trace.get_tracer(__name__)
 
-params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
+params = pika.URLParameters(rabbit_mq_url)
 
 connection = pika.BlockingConnection(params)
 

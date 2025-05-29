@@ -1,45 +1,45 @@
-services:
-  flask_backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 5000:5000
-    volumes:
-      - .:/home/app
-    depends_on:
-      - db
-    networks:
-      - shared-network
+# services:
+#   flask_backend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - 5000:5000
+#     volumes:
+#       - .:/home/app
+#     depends_on:
+#       - db
+#     networks:
+#       - shared-network
       
-  queue:
-    build:
-      context: .
-      dockerfile: Dockerfile.queue
-    depends_on:
-      - db
+#   queue:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.queue
+#     depends_on:
+#       - db
 
-    networks:
-      - shared-network
+#     networks:
+#       - shared-network
 
-  db:
-    image: mysql:8.0.32
-    restart: always
-    environment:
-      MYSQL_DATABASE: main
-      # MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - 3306:3306
-    networks:
-      - shared-network
+#   db:
+#     image: mysql:8.0.32
+#     restart: always
+#     environment:
+#       MYSQL_DATABASE: main
+#       # MYSQL_USER: root
+#       MYSQL_PASSWORD: root
+#       MYSQL_ROOT_PASSWORD: root
+#     volumes:
+#       - db_data:/var/lib/mysql
+#     ports:
+#       - 3306:3306
+#     networks:
+#       - shared-network
 
-volumes:
-  db_data:
+# volumes:
+#   db_data:
 
-networks:
-  shared-network:
-    external: true
+# networks:
+#   shared-network:
+#     external: true

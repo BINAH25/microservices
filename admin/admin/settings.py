@@ -27,14 +27,17 @@ from opentelemetry.instrumentation.pika import PikaInstrumentor
 
 # OpenTelemetry configuration
 # Set service name
+
+jeager_url = os.environ.get("JAEGAR_URL")
+jeager_port = os.environ.get("JAEGAR_PORT")
 resource = Resource(attributes={
     SERVICE_NAME: "django-service"
 })
 
 # Jaeger exporter configuration
 jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",  # Replace with your Jaeger agent's IP
-    agent_port=6831,
+    agent_host_name=jeager_url,  
+    agent_port=jeager_port,
 )
 
 # Setup the tracer provider and add the Jaeger exporter

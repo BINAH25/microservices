@@ -1,13 +1,14 @@
 import pika, json
-
+import os 
 from opentelemetry import trace
 from opentelemetry.trace import set_span_in_context
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 tracer = trace.get_tracer(__name__)
+rabbit_mq_url = os.environ.get("RABBIT_MQ_URL")
 
 def publish(method, body):
-    params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
+    params = pika.URLParameters(rabbit_mq_url)
 
     try:
         connection = pika.BlockingConnection(params)

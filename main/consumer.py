@@ -6,7 +6,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor, BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-
+import os
 # Match the same service name
 resource = Resource(attributes={
     SERVICE_NAME: "flask_service"  # Same as main.py
@@ -14,17 +14,22 @@ resource = Resource(attributes={
 
 trace.set_tracer_provider(TracerProvider(resource=resource))
 tracer_provider = trace.get_tracer_provider()
+jeager_url = os.environ.get("JAEGAR_URL")
+jeager_port = os.environ.get("JAEGAR_PORT")
+
+rabbit_mq_url = os.environ.get("RABBIT_MQ_URL")
+
 
 jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",
-    agent_port=6831,
+    agent_host_name=jeager_url,
+    agent_port=jeager_port,
 )
 tracer_provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
 
 # Now get the tracer
 tracer = trace.get_tracer(__name__)
 
-params = pika.URLParameters('amqps://egqukmzy:2tO7ORPNQcC8O3fQ1B5QAbluJi5GG7il@beaver.rmq.cloudamqp.com/egqukmzy')
+params = pika.URLParameters(rabbit_mq_url)
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
 

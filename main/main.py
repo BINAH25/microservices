@@ -26,10 +26,13 @@ from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 resource = Resource(attributes={SERVICE_NAME: "flask_service"})
 provider = TracerProvider(resource=resource)
 trace.set_tracer_provider(provider)
+jeager_url = os.environ.get("JAEGAR_URL")
+jeager_port = os.environ.get("JAEGAR_PORT")
+rabbit_mq_url = os.environ.get("RABBIT_MQ_URL")
 
 jaeger_exporter = JaegerExporter(
-    agent_host_name="13.58.193.105",
-    agent_port=6831,
+    agent_host_name=jeager_url,
+    agent_port=jeager_port,
 )
 provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
 
