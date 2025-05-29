@@ -1,0 +1,3 @@
+./primary/terraform.tfvars
+./primary/.terraform/
+primary/.terraform/

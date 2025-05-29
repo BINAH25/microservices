@@ -1,6 +1,6 @@
 # Python Microservices Architecture
 
-This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service, along with a React frontend. The system uses RabbitMQ for message queuing and MySQL for data persistence.
+This project implements a microservices architecture using Python, featuring two main services: a Flask-based main service and a Django-based admin service, along with a React frontend. The system uses RabbitMQ for message queuing and MySQL for data persistence. Infrastructure is managed with Terraform for AWS deployment.
 
 
 ## Content
@@ -9,9 +9,8 @@ This project implements a microservices architecture using Python, featuring two
   - [Frontend](#frontend)
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
+  - [Infrastructure as Code](#infrastructure-as-code)
 - [Application Screenshots](#application-screenshots)
-  - [Main Service Screenshot](#main-service-screenshot)
-  - [Admin Service Screenshot](#admin-service-screenshot)
   - [RabbitMQ Dashboard](#rabbitmq-dashboard)
   - [Monitoring Dashboard](#monitoring-dashboard)
 - [Prerequisites](#prerequisites)
@@ -46,7 +45,9 @@ This project implements a microservices architecture using Python, featuring two
 
 ## Architecture Overview
 
-The project consists of three main components:
+![Application Architecture](./resources/architecture.png)
+
+The project consists of four main components:
 
 1. **Frontend** (React-based)
    - User interface for product display and interaction
@@ -67,6 +68,17 @@ The project consists of three main components:
    - Producer-Consumer pattern implementation with RabbitMQ
    - OpenTelemetry integration for observability
    - Prometheus integration for metrics collection
+
+4. **Infrastructure** (Terraform-based)
+   - AWS cloud infrastructure as code
+   - ECS Fargate for containerized services
+   - RDS databases for persistent storage
+   - ALB for load balancing and routing
+   - Route53 for DNS management
+   - ACM for SSL/TLS certificates
+   - ECR for container registry
+   - VPC networking with public and private subnets
+   - AWS Secrets Manager for credentials
 
 ## Application Screenshots
 
@@ -99,6 +111,18 @@ The project consists of three main components:
 - **Styling**: Bootstrap CSS
 - **Deployment**: Nginx with Docker
 - **HTTP Client**: Native Fetch API
+
+### Infrastructure as Code
+- **IaC Tool**: Terraform 1.0+
+- **Cloud Provider**: AWS
+- **Compute**: ECS Fargate
+- **Database**: RDS (MySQL, PostgreSQL)
+- **Load Balancing**: Application Load Balancer (ALB)
+- **DNS**: Route53
+- **TLS/SSL**: ACM (AWS Certificate Manager)
+- **Container Registry**: ECR
+- **Secrets Management**: AWS Secrets Manager
+- **Networking**: VPC with public and private subnets
 
 #### Core Components
 
@@ -144,7 +168,7 @@ The project consists of three main components:
 - **Message Queue Client**: Pika 1.1.0+ (RabbitMQ client)
 - **Monitoring**: Prometheus Flask Exporter
 - **Database Driver**: PyMySQL
-- **AWS Integration**: Boto3 (AWS SDK)
+- **AWS Integration**: Boto3
 - **WSGI Server**: Gunicorn
 
 #### Core Components
@@ -333,7 +357,7 @@ The project consists of three main components:
 - Python 3.8+
 - MySQL 8.0
 - RabbitMQ
-- AWS account (for Secrets Manager)
+- AWS account (Cloud Infrastructure)
 
 ## Project Structure
 
@@ -368,7 +392,7 @@ The project consists of three main components:
 │       │   ├── nginx.conf   # Nginx configuration
 │       │   └── package.json # Dependencies and scripts
 │       └── docker-compose.yml # Docker configuration for frontend
-│
+
 ├── main/                    # Main service (Flask)
 │   ├── main.py             # Main application
 │   ├── producer.py         # Message producer for RabbitMQ
@@ -377,11 +401,31 @@ The project consists of three main components:
 │   ├── Dockerfile.queue    # Docker configuration for the consumer
 │   ├── requirements.txt    # Python dependencies
 │   └── docker-compose.yml  # Docker configuration
-│
+
 ├── grafana-prometheus/      # Monitoring stack
 │   ├── prometheus.yml      # Prometheus configuration
 │   └── docker-compose.yml  # Docker configuration for monitoring services
-│
+
+├── terraform-micro-service/ # Infrastructure as code
+│   ├── modules/            # Reusable Terraform modules
+│   │   ├── acm/            # SSL/TLS certificate management
+│   │   ├── alb/            # Application Load Balancer
+│   │   ├── ecr/            # Elastic Container Registry
+│   │   ├── ecs-cluster/    # ECS Cluster configuration
+│   │   ├── ecs-service/    # ECS Service deployment
+│   │   ├── rds/            # RDS database configuration
+│   │   ├── route53/        # DNS management
+│   │   ├── secret_manager/ # Secrets management
+│   │   ├── security_groups/ # Security group configuration
+│   │   ├── subdomain/      # Subdomain configuration
+│   │   └── vpc/            # VPC networking
+│   ├── primary/            # Main Terraform configuration
+│   │   ├── main.tf         # Primary infrastructure definition
+│   │   ├── variables.tf    # Input variables
+│   │   ├── outputs.tf      # Output values
+│   │   └── terraform.tfvars # Variable values
+│   └── scripts/            # Deployment scripts
+
 ├── images/                  # Screenshots and diagrams
 ├── Jenkinsfile             # CI/CD pipeline configuration
 └── .gitignore             # Git ignore rules
@@ -408,40 +452,18 @@ The project consists of three main components:
    docker-compose up --build
    ```
 
-4. Start the admin service<!-- ### Main Service {#screenshots-main-service}
 
-![Main Service Products API](./resources/main.png)
-*The Main Service Products API displaying a list of products*
-
-![Main Service Health Check](/images/main-service-health.png)
-*Health check endpoint showing service status*
-
-![Main Service Metrics](/images/main-service-metrics.png)
-*Prometheus metrics exposed by the Main Service*
-
-### Admin Service {#screenshots-admin-service}
+### Admin Service
 
 ![Admin Dashboard](/images/admin-dashboard.png)
 *Django Admin dashboard for product management*
-
-![Admin Service API](/images/admin-service-api.png)
-*Admin Service REST API for products*
-
-![Admin Service Metrics](/images/admin-metrics.png)
-*Prometheus metrics for the Admin Service*
-
-### RabbitMQ Dashboard {#screenshots-rabbitmq}
+### RabbitMQ Dashboard
 
 ![RabbitMQ Overview](/images/rabbitmq-overview.png)
 *CloudAMQP RabbitMQ management dashboard overview*
 
-![Message Queues](/images/rabbitmq-queues.png)
-*Active queues with message counts and consumers*
 
-![Message Flow](/images/rabbitmq-flow.png)
-*Message flow visualization between services*
-
-### Monitoring Dashboard {#screenshots-monitoring}
+### Monitoring Dashboard
 
 ![Grafana Dashboard](/images/grafana-dashboard.png)
 *Grafana dashboard showing service metrics*
@@ -602,10 +624,6 @@ The project consists of three main components:
   - Path parameter: `id` (Product ID)
   - Response: Empty response
   - Status codes: 204 (No Content), 404 (Not Found)
-
-- **GET** `/api/user`: Returns a random user ID
-  - Response: User ID
-  - Status codes: 200 (Success), 404 (Not Found)
 
 - **GET** `/metrics`: Prometheus metrics endpoint
   - Response: Prometheus metrics in text format
@@ -1125,6 +1143,15 @@ The project includes a Jenkins pipeline that:
    - Ensure Grafana can connect to Prometheus data source
    - Restart monitoring services if dashboards are not populating
 
+6. **Infrastructure Issues**
+   - Verify AWS credentials and permissions
+   - Check Terraform state for drift or conflicts
+   - Examine CloudWatch logs for ECS service failures
+   - Verify RDS connectivity and security group rules
+   - Check ALB target group health status
+   - Validate ACM certificate status and expiration
+   - Inspect Route53 DNS record propagation
+
 ## Development Guidelines
 
 1. **Code Style**
@@ -1146,6 +1173,8 @@ The project includes a Jenkins pipeline that:
    - Keep README up to date
    - Document component props in frontend code
    - Include JSDoc comments for frontend functions
+   - Document Terraform variables and outputs
+   - Update architecture diagrams when infrastructure changes
 
 ## Contributing
 
@@ -1165,6 +1194,227 @@ The project includes a Jenkins pipeline that:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details. -->
+
+## Infrastructure as Code
+
+The project uses Terraform to provision and manage the AWS infrastructure required to run the microservices architecture.
+
+### Terraform Modules
+
+The infrastructure is organized into reusable modules:
+
+1. **VPC Module** (`modules/vpc`)
+   - Creates a VPC with public and private subnets
+   - Sets up internet and NAT gateways
+   - Configures route tables for proper network routing
+   - Implements subnet segregation for different service tiers
+   - Supports multi-AZ deployment for high availability
+
+2. **Security Group Module** (`modules/security_groups`)
+   - Defines security groups for all services:
+     - Frontend ALB and ECS service
+     - Django ALB, ECS service, and database
+     - Flask ALB, ECS service, and database
+   - Implements least privilege principle for network access
+   - Segregates traffic between different service tiers
+   - Controls inbound/outbound traffic with specific port rules
+
+3. **RDS Module** (`modules/rds`)
+   - Provisions MySQL database for the Flask service
+   - Provisions PostgreSQL database for the Django service
+   - Configures backups, maintenance windows, and security
+   - Creates subnet groups for database placement
+   - Integrates with AWS Secrets Manager for credentials
+   - Supports database parameter groups and option groups
+
+4. **ECS Modules**
+   - **ECS Cluster** (`modules/ecs-cluster`): Creates an ECS cluster for organizing containers
+   - **ECS Service** (`modules/ecs-service`):
+     - Deploys and manages containerized applications
+     - Configures task definitions with CPU and memory settings
+     - Sets up IAM roles and policies for task execution
+     - Establishes CloudWatch log groups for container logs
+     - Enables integration with load balancers and security groups
+     - Supports both public-facing and internal services
+
+5. **Load Balancer Module** (`modules/alb`)
+   - Application Load Balancers for each service
+   - Target groups with customizable health check paths and ports
+   - HTTPS listeners with proper certificate configuration
+   - Redirect HTTP to HTTPS for secure communication
+   - Configurable idle timeout and deletion protection
+
+6. **DNS and Certificate Modules**
+   - **Route53** (`modules/route53`):
+     - Manages hosted zones for domain
+     - Creates A records pointing to load balancers
+     - Supports health checks for DNS failover
+   - **Subdomain** (`modules/subdomain`): Creates and manages subdomains for services
+   - **ACM** (`modules/acm`):
+     - Provisions SSL/TLS certificates
+     - Validates certificates using DNS validation
+     - Manages certificate renewals
+
+7. **Secrets Manager Module** (`modules/secret_manager`)
+   - Securely stores database credentials
+   - Provides access to services through IAM roles
+   - Centralizes secret management
+   - Supports secure rotation of credentials
+   - Integrates with RDS for database username/password management
+
+8. **ECR Module** (`modules/ecr`)
+   - Creates repositories for container images
+   - Configures repository policies and lifecycle rules
+   - Manages image scanning and tag mutability settings
+
+### Deployment Architecture
+
+The Terraform code deploys the following AWS architecture:
+
+- **Networking**:
+  - VPC with 4 public and 4 private subnets across 2 availability zones
+  - Internet Gateway for public subnet access
+  - NAT Gateways for private subnet outbound traffic
+  - Route tables for traffic management
+
+- **Compute**:
+  - ECS Fargate for containerized services:
+    - Frontend service (React application)
+    - Main service (Flask API)
+    - Main queue consumer
+    - Admin service (Django API)
+    - Admin queue consumer
+  - Task definitions with right-sized CPU and memory allocations
+
+- **Database**:
+  - RDS instances for MySQL (Flask service) and PostgreSQL (Django service)
+  - Multi-AZ deployment for high availability
+  - Automated backups and maintenance windows
+  - Private subnet placement for enhanced security
+
+- **Load Balancing**:
+  - Application Load Balancers with automatic routing
+  - Path-based routing for API endpoints
+  - Health checks for service availability monitoring
+  - SSL termination for secure communication
+
+- **Security**:
+  - IAM roles with least privilege principle
+  - Security groups for fine-grained traffic control
+  - HTTPS enforcement with TLS 1.2+
+  - Private subnets for sensitive components
+
+- **Monitoring and Logging**:
+  - CloudWatch for logs and metrics
+  - Container insights for performance monitoring
+  - Log groups with appropriate retention periods
+  - Service health monitoring and alerting
+
+- **Service Discovery**:
+  - Route53 for DNS management
+  - Custom domain and subdomains (django.seyram.site, flask.seyram.site)
+  - Health check integration
+
+### Deployment Process
+
+To deploy the infrastructure:
+
+1. Configure AWS credentials:
+   ```bash
+   export AWS_ACCESS_KEY_ID="your-access-key"
+   export AWS_SECRET_ACCESS_KEY="your-secret-key"
+   export AWS_DEFAULT_REGION="us-east-2"
+   ```
+
+2. Update `terraform.tfvars` with appropriate values:
+   ```hcl
+   # Network Configuration
+   vpc_name                = "micro-service-project-vpc"
+   vpc_cidr                = "10.0.0.0/16"
+   cidr_public_subnet      = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
+   cidr_private_subnet     = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24", "10.0.14.0/24"]
+   availability_zones      = ["us-east-2a", "us-east-2b", "us-east-2a", "us-east-2b"]
+
+   # Domain Configuration
+   domain_name             = "seyram.site"
+   alternative_names       = ["*.seyram.site"]
+
+   # Database Configuration
+   db_instance_class       = "db.t3.micro"
+   storage_type            = "gp2"
+
+   # ECS Configuration
+   cluster_name            = "micro-service-cluster"
+   ```
+
+3. Initialize Terraform:
+   ```bash
+   cd terraform-micro-service/primary
+   terraform init -backend-config="bucket=your-terraform-state-bucket" -backend-config="key=microservices/terraform.tfstate"
+   ```
+
+4. Plan the deployment:
+   ```bash
+   terraform plan -out=tfplan
+   ```
+
+5. Review the plan output and apply the changes:
+   ```bash
+   terraform apply tfplan
+   ```
+
+6. After deployment, get the output values:
+   ```bash
+   terraform output
+   ```
+
+7. For updates or changes:
+   ```bash
+   terraform plan -out=tfplan
+   terraform apply tfplan
+   ```
+
+### Infrastructure Management
+
+- **State Management**:
+  - Remote state stored in S3 with locking via DynamoDB
+  - State file encryption for sensitive data protection
+  - State versioning for history and recovery
+
+- **CI/CD Integration**:
+  - Terraform execution as part of CI/CD pipeline
+  - Automated validation and plan generation
+  - Approval gates for infrastructure changes
+  - Integration with Jenkins pipeline
+
+- **Environment Separation**:
+  - Variable files for different environments (dev, staging, production)
+  - Module reuse across environments with different parameters
+  - Workspace-based environment isolation
+  - Naming conventions for resource identification
+
+- **Secret Rotation**:
+  - Automated through AWS Secrets Manager
+  - Periodic rotation policies for credentials
+  - Integration with RDS for database credential management
+  - IAM-based access control for secrets
+
+- **Infrastructure Monitoring**:
+  - Resource tagging for cost allocation and identification
+  - CloudWatch alarms for resource utilization
+  - Infrastructure metrics collection and visualization
+  - Cost optimization recommendations
+
+- **Disaster Recovery**:
+  - Database backups and point-in-time recovery
+  - Multi-AZ deployments for high availability
+  - Terraform state backups
+  - Documentation for recovery procedures
+
+## Infrastructure Diagrams
+
+### AWS Architecture Overview
+
 
 ## Support
 
