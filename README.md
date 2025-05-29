@@ -10,9 +10,6 @@ This project implements a microservices architecture using Python, featuring two
   - [Main Service](#main-service)
   - [Admin Service](#admin-service)
   - [Infrastructure as Code](#infrastructure-as-code)
-- [Application Screenshots](#application-screenshots)
-  - [RabbitMQ Dashboard](#rabbitmq-dashboard)
-  - [Monitoring Dashboard](#monitoring-dashboard)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -46,6 +43,7 @@ This project implements a microservices architecture using Python, featuring two
 ## Architecture Overview
 
 ![Application Architecture](./resources/architecture.png)
+*This architecture represents a microservices-based web application with separate frontend and backend services, containerized using Docker and connected through APIs and messaging queues.*
 
 The project consists of four main components:
 
@@ -80,26 +78,14 @@ The project consists of four main components:
    - VPC networking with public and private subnets
    - AWS Secrets Manager for credentials
 
-## Application Screenshots
-
-### Frontend Screenshots
-![frontend](./resources/main.png)
-
-### RabbitMQ Dashboard
-
-![RabbitMQ Overview](/images/rabbitmq-overview.png)
-*CloudAMQP RabbitMQ management dashboard overview*
-
 ### Monitoring Dashboard
 
 ![Grafana Dashboard - Django](./resources/grafana-django.png)
 *Grafana dashboard showing service metrics*
 
-![Prometheus Targets](/images/prometheus-targets.png)
+![Prometheus Targets](./resources/prometheus-targets.png)
 *Prometheus targets showing scrape status*
 
-![Service Metrics](/images/service-metrics.png)
-*Detailed service performance metrics*
 
 ## Technology Stack
 
@@ -451,30 +437,6 @@ The project consists of four main components:
    cd main
    docker-compose up --build
    ```
-
-
-### Admin Service
-
-![Admin Dashboard](/images/admin-dashboard.png)
-*Django Admin dashboard for product management*
-### RabbitMQ Dashboard
-
-![RabbitMQ Overview](/images/rabbitmq-overview.png)
-*CloudAMQP RabbitMQ management dashboard overview*
-
-
-### Monitoring Dashboard
-
-![Grafana Dashboard](/images/grafana-dashboard.png)
-*Grafana dashboard showing service metrics*
-
-![Prometheus Targets](/images/prometheus-targets.png)
-*Prometheus targets showing scrape status*
-
-![Service Metrics](/images/service-metrics.png)
-*Detailed service performance metrics*
-
-## Technology Stack
 
 ### Main Service
 - **Framework**: Flask 1.1.2+
@@ -906,6 +868,11 @@ The admin service is instrumented with OpenTelemetry for distributed tracing. Th
 ## Message Queue Architecture
 
 Both services communicate through RabbitMQ using the following message routing:
+
+### RabbitMQ Dashboard
+
+![RabbitMQ Overview](./resources/rabbitmq.png)
+*CloudAMQP RabbitMQ management dashboard overview*
 
 1. **Main Service:**
    - Publishes to `admin` queue when a product is liked (with `product_liked` content-type)
