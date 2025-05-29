@@ -1141,6 +1141,14 @@ The project includes a Jenkins pipeline that:
    - Document Terraform variables and outputs
    - Update architecture diagrams when infrastructure changes
 
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
 
 ## Infrastructure as Code
 
@@ -1359,15 +1367,7 @@ To deploy the infrastructure:
   - Documentation for recovery procedures
 
 ### AWS Architecture Overview
-![Infrastructure Diagram](./resources/micro-service-architecture.png)
-
-## Authors
-
-    Louis Binah <louisbinah@gmail.com>
-    Yaw Mintah <yawmintah@gmail.com>
-    Michael Oppong <michaeloppong731@gmail.com>
-    Hamdani Alhassan Gandi <hamdanialhassangandi2020@gmail.com>
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the LICENSE file for details.
