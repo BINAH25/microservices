@@ -32,7 +32,7 @@ rabbit_mq_url = os.environ.get("RABBIT_MQ_URL")
 
 jaeger_exporter = JaegerExporter(
     agent_host_name=jeager_url,
-    agent_port=jeager_port,
+    agent_port=6831,
 )
 provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
 

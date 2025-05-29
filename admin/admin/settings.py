@@ -37,7 +37,7 @@ resource = Resource(attributes={
 # Jaeger exporter configuration
 jaeger_exporter = JaegerExporter(
     agent_host_name=jeager_url,  
-    agent_port=jeager_port,
+    agent_port=6831,
 )
 
 # Setup the tracer provider and add the Jaeger exporter
