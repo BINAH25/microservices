@@ -795,10 +795,8 @@ To set up your own secrets:
 
 ### Grafana and Prometheus Setup
 The project includes a dedicated monitoring stack with Grafana and Prometheus:
-
-#### Architecture
-- **Prometheus**: Collects and stores metrics from all services
-- **Grafana**: Provides visualization dashboards for the collected metrics
+1. Prometheus collect metrics and serve as a storage system for the metrics. It includes all metrics from both services, stores time-series data for long-term analysis, and provides a query language (PromQL) for data retrieval and analysis.
+2. Grafana functions as a visualization and dashboard platform. It connects to Prometheus as a data source, provides customizable dashboards, and support alerting based on metrics thresholds.
 
 #### Configuration
 The monitoring stack is configured in the `grafana-prometheus` directory:
@@ -1073,7 +1071,7 @@ channel.basic_consume(queue='admin',
 
 The project includes a Jenkins pipeline that:
 - Builds and tests the application
-- Runs security scans
+- Runs security scans using Trivy
 - Deploys to staging/production environments
 - Performs database migrations
 
@@ -1143,24 +1141,6 @@ The project includes a Jenkins pipeline that:
    - Document Terraform variables and outputs
    - Update architecture diagrams when infrastructure changes
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Authors
-
-- Louis Binah <louisbinah@gmail.com>
-- Yaw Mintah <yawmintah@gmail.com>
-- Michael Oppong <michaeloppong731@gmail.com>
-- Hamdani Alhassan Gandi <hamdanialhassangandi2020@gmail.com>
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. -->
 
 ## Infrastructure as Code
 
@@ -1378,13 +1358,16 @@ To deploy the infrastructure:
   - Terraform state backups
   - Documentation for recovery procedures
 
-## Infrastructure Diagrams
-
 ### AWS Architecture Overview
+![Infrastructure Diagram](./resources/micro-service-architecture.png)
 
+## Authors
 
-## Support
+    Louis Binah <louisbinah@gmail.com>
+    Yaw Mintah <yawmintah@gmail.com>
+    Michael Oppong <michaeloppong731@gmail.com>
+    Hamdani Alhassan Gandi <hamdanialhassangandi2020@gmail.com>
 
-For support or questions, please contact:
-- Louis Binah <louisbinah@gmail.com>
-- Open an issue on the repository
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
