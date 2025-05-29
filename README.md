@@ -35,10 +35,6 @@ This project implements a microservices architecture using Python, featuring two
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Troubleshooting](#troubleshooting)
   - [Common Issues](#common-issues)
-- [Development Guidelines](#development-guidelines)
-- [Contributing](#contributing)
-- [Authors](#authors)
-- [Support](#support)
 
 ## Architecture Overview
 
@@ -97,6 +93,7 @@ The project consists of four main components:
 - **Styling**: Bootstrap CSS
 - **Deployment**: Nginx with Docker
 - **HTTP Client**: Native Fetch API
+![frontend](./resources/main.png)
 
 ### Infrastructure as Code
 - **IaC Tool**: Terraform 1.0+
@@ -208,23 +205,6 @@ The project consists of four main components:
 - Automated database migration using Flask-Migrate
 - Gunicorn WSGI server for production deployment
 - Non-root user execution for queue consumer (security best practice)
-
-#### Security Features
-
-- AWS Secrets Manager integration for secure database credential storage
-- Fallback to environment variables when AWS Secrets Manager is unavailable
-- Containerized services with minimal dependencies using Alpine Linux
-- Security headers through Flask-CORS configuration
-- Non-root user execution for message queue consumers
-- Secure connection to CloudAMQP using AMQPS protocol
-
-#### High Availability and Scaling
-
-- Stateless application design for horizontal scaling
-- Health check endpoint for container orchestration monitoring
-- Prometheus metrics for performance monitoring and alerting
-- Containerized architecture supporting orchestration with Kubernetes or ECS
-- Database connection error handling with graceful degradation
 
 ### Admin Service
 - **Framework**: Django 3.1.3+
@@ -500,23 +480,6 @@ The project consists of four main components:
 - Automated database migration using Flask-Migrate
 - Gunicorn WSGI server for production deployment
 - Non-root user execution for queue consumer (security best practice)
-
-#### Security Features
-
-- AWS Secrets Manager integration for secure database credential storage
-- Fallback to environment variables when AWS Secrets Manager is unavailable
-- Containerized services with minimal dependencies using Alpine Linux
-- Security headers through Flask-CORS configuration
-- Non-root user execution for message queue consumers
-- Secure connection to CloudAMQP using AMQPS protocol
-
-#### High Availability and Scaling
-
-- Stateless application design for horizontal scaling
-- Health check endpoint for container orchestration monitoring
-- Prometheus metrics for performance monitoring and alerting
-- Containerized architecture supporting orchestration with Kubernetes or ECS
-- Database connection error handling with graceful degradation
 
 ### Admin Service
 - **Framework**: Django 3.1.3+
@@ -839,37 +802,13 @@ Access the interfaces at:
   - Request processing time by view
   - Django admin action metrics
 
-#### Dashboard Templates
-Pre-configured dashboards include:
-- Microservices Overview
-- Service Health Status
-- Database Performance
-- API Performance Metrics
-- RabbitMQ Queue Metrics
-- Error Rate and Exception Tracking
-- Service Resource Usage
-
-#### Integration with Services
-Both microservices expose Prometheus metrics:
-- Main service: Metrics exposed via `prometheus-flask-exporter` at `/metrics`
-- Admin service: Metrics exposed via `django-prometheus` at `/metrics`
-
-The Prometheus server scrapes these endpoints at the configured intervals and stores the time-series data, which Grafana then visualizes through customizable dashboards.
-
-### OpenTelemetry
-The admin service is instrumented with OpenTelemetry for distributed tracing. This complements the Prometheus metrics by providing request-level tracing data that shows the journey of requests through different components of the system.
-
-### Health Checks
-- Main service: `/flask/api/health`
-- Admin service: `/api/health`
-
 ## Message Queue Architecture
 
 Both services communicate through RabbitMQ using the following message routing:
 
 ### RabbitMQ Dashboard
 
-![RabbitMQ Overview](./resources/rabbitmq.png)
+![RabbitMQ Overview](./resources/react.png)
 *CloudAMQP RabbitMQ management dashboard overview*
 
 1. **Main Service:**
@@ -1117,38 +1056,6 @@ The project includes a Jenkins pipeline that:
    - Validate ACM certificate status and expiration
    - Inspect Route53 DNS record propagation
 
-## Development Guidelines
-
-1. **Code Style**
-   - Follow PEP 8 guidelines for Python code
-   - Follow ESLint/Prettier rules for JavaScript/TypeScript
-   - Use type hints in Python and TypeScript
-   - Write docstrings for all functions and classes
-
-2. **Testing**
-   - Write unit tests for new features
-   - Maintain test coverage above 80%
-   - Run tests before committing
-   - Use Jest for frontend testing
-   - Use pytest for backend testing
-
-3. **Documentation**
-   - Update API documentation when making changes
-   - Document new environment variables
-   - Keep README up to date
-   - Document component props in frontend code
-   - Include JSDoc comments for frontend functions
-   - Document Terraform variables and outputs
-   - Update architecture diagrams when infrastructure changes
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
 
 ## Infrastructure as Code
 
@@ -1367,7 +1274,25 @@ To deploy the infrastructure:
   - Documentation for recovery procedures
 
 ### AWS Architecture Overview
+![AWS Architecture Overview](./resources/micro-service-architecture.png)
 
+
+#### Security Features
+
+- AWS Secrets Manager integration for secure database credential storage
+- Fallback to environment variables when AWS Secrets Manager is unavailable
+- Containerized services with minimal dependencies using Alpine Linux
+- Security headers through Flask-CORS configuration
+- Non-root user execution for message queue consumers
+- Secure connection to CloudAMQP using AMQPS protocol
+
+#### High Availability and Scaling
+
+- Stateless application design for horizontal scaling
+- Health check endpoint for container orchestration monitoring
+- Prometheus metrics for performance monitoring and alerting
+- Containerized architecture supporting orchestration with ECS
+- Database connection error handling with graceful degradation
 ## License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE)
